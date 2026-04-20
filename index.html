@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanskar Lohani</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    color: #00ff88;
+    font-family: 'Courier New', Courier, monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+  #terminal {
+    width: 100%;
+    max-width: 860px;
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0,255,136,0.05);
+  }
+  #titlebar {
+    background: #1a1a1a;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+  #titlebar span { color: #555; font-size: 13px; margin-left: auto; margin-right: auto; }
+  #output {
+    padding: 20px;
+    min-height: 400px;
+    max-height: 75vh;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.8;
+    scroll-behavior: smooth;
+  }
+  #output::-webkit-scrollbar { width: 4px; }
+  #output::-webkit-scrollbar-track { background: #0d0d0d; }
+  #output::-webkit-scrollbar-thumb { background: #1a1a1a; }
+  .line { display: block; white-space: pre-wrap; word-break: break-word; }
+  .prompt { color: #00ff88; }
+  .cmd { color: #ffffff; }
+  .info { color: #888; }
+  .highlight { color: #00ff88; }
+  .warn { color: #febc2e; }
+  .error { color: #ff5f57; }
+  .success { color: #28c840; }
+  .dim { color: #444; }
+  .cyan { color: #00d4ff; }
+  .pink { color: #ff6eb4; }
+  .section-header { color: #00ff88; font-weight: bold; }
+  #input-line {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-top: 1px solid #1a1a1a;
+    background: #0d0d0d;
+  }
+  #prompt-label { color: #00ff88; white-space: nowrap; margin-right: 8px; font-size: 14px; }
+  #cmd-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    flex: 1;
+    caret-color: #00ff88;
+  }
+  .img-output {
+    margin: 10px 0;
+    border-radius: 4px;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  .img-output img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    display: block;
+    border-radius: 4px;
+    border: 1px solid #1a1a1a;
+  }
+  .img-caption {
+    color: #555;
+    font-size: 12px;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .help-grid {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 4px 16px;
+    margin: 8px 0;
+  }
+  .help-cmd { color: #00ff88; }
+  .help-desc { color: #666; }
+  a { color: #00d4ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: #00ff88; animation: blink 1s infinite; vertical-align: middle; margin-left: 2px; }
+  .tag { background: #1a1a1a; color: #00ff88; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin: 2px; display: inline-block; border: 1px solid #222; }
+</style>
+</head>
+<body>
+
+<div id="terminal">
+  <div id="titlebar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <span>sanskar@portfolio ~ bash</span>
+  </div>
+  <div id="output"></div>
+  <div id="input-line">
+    <span id="prompt-label">sanskar@portfolio:~$</span>
+    <input id="cmd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus />
+  </div>
+</div>
+
+<script>
+const PHOTOS = {
+  annapurna:  + photos[annapurna] + ,
+  abc:  + photos[abc] + ,
+  forest:  + photos[forest] + ,
+  mist:  + photos[mist] + ,
+  ride:  + photos[ride] + ,
+  sunset:  + photos[sunset] + 
+};
+
+const out = document.getElementById('output');
+const input = document.getElementById('cmd-input');
+let booting = true;
+let history = [];
+let histIdx = -1;
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function addLine(text, cls='line info') {
+  const el = document.createElement('span');
+  el.className = cls;
+  el.innerHTML = text;
+  out.appendChild(el);
+  out.appendChild(document.createElement('br'));
+  out.scrollTop = out.scrollHeight;
+  return el;
+}
+
+function addImg(key, caption) {
+  const wrap = document.createElement('div');
+  wrap.className = 'img-output';
+  const img = document.createElement('img');
+  img.src = 'data:image/jpeg;base64,' + PHOTOS[key];
+  img.alt = caption;
+  const cap = document.createElement('div');
+  cap.className = 'img-caption';
+  cap.textContent = caption;
+  wrap.appendChild(img);
+  wrap.appendChild(cap);
+  out.appendChild(wrap);
+  out.scrollTop = out.scrollHeight;
+}
+
+function addBlank() {
+  out.appendChild(document.createElement('br'));
+}
+
+async function typeText(text, cls='line info', delay=18) {
+  const el = document.createElement('span');
+  el.className = cls;
+  out.appendChild(el);
+  out.appendChild(document.createElement('br'));
+  for (let ch of text) {
+    el.textContent += ch;
+    out.scrollTop = out.scrollHeight;
+    await sleep(delay);
+  }
+}
+
+async function boot() {
+  await sleep(300);
+  await typeText('Initializing...', 'line dim', 30);
+  await sleep(200);
+  await typeText('Loading kernel modules... [OK]', 'line dim', 20);
+  await sleep(150);
+  await typeText('Mounting filesystem... [OK]', 'line dim', 20);
+  await sleep(200);
+  await typeText('Establishing secure connection... [OK]', 'line dim', 20);
+  await sleep(400);
+  addBlank();
+  await typeText('Welcome to Sanskar's Terminal', 'line section-header', 25);
+  await sleep(200);
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addBlank();
+  await typeText('  Cybersecurity Engineer. Cloud threat hunter.', 'line cyan', 20);
+  await typeText('  Former mountain person. Motorcycle enthusiast.', 'line cyan', 20);
+  await typeText('  MS Cybersecurity @ FIU ' 26  |  Miami, FL', 'line cyan', 20);
+  addBlank();
+  addLine('  <span class=tag>AZ-500</span> <span class=tag>Security+</span> <span class=tag>Microsoft Sentinel</span> <span class=tag>KQL</span> <span class=tag>Azure</span>', 'line');
+  addBlank();
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addBlank();
+  await typeText('Type a command below. Start with 'help' if you're new here.', 'line info', 18);
+  addBlank();
+  booting = false;
+  input.focus();
+}
+
+function showHelp() {
+  addBlank();
+  addLine('Available commands:', 'line section-header');
+  addBlank();
+  const grid = document.createElement('div');
+  grid.className = 'help-grid';
+  const cmds = [
+    ['whoami','who is this person'],
+    ['skills','technical arsenal'],
+    ['projects','things built'],
+    ['certs','credentials earned'],
+    ['contact','find me'],
+    ['annapurna','easter egg #1'],
+    ['abc','easter egg #2'],
+    ['forest','easter egg #3'],
+    ['mist','easter egg #4'],
+    ['ride','easter egg #5'],
+    ['sunset','easter egg #6'],
+    ['clear','clean the slate'],
+    ['help','show this menu'],
+  ];
+  cmds.forEach(([cmd, desc]) => {
+    const c = document.createElement('span');
+    c.className = 'help-cmd';
+    c.textContent = cmd;
+    const d = document.createElement('span');
+    d.className = 'help-desc';
+    d.textContent = '— ' + desc;
+    grid.appendChild(c);
+    grid.appendChild(d);
+  });
+  out.appendChild(grid);
+  addBlank();
+  out.scrollTop = out.scrollHeight;
+}
+
+function showWhoami() {
+  addBlank();
+  addLine('sanskar lohani', 'line section-header');
+  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addBlank();
+  addLine('Originally from Nepal. Grew up trekking mountains,', 'line info');
+  addLine('riding motorcycles on roads that probably shouldn't', 'line info');
+  addLine('exist. Somewhere along the way, ended up in Miami', 'line info');
+  addLine('chasing zero-days instead of summits.', 'line info');
+  addBlank();
+  addLine('Cybersecurity is its own kind of wilderness —', 'line cyan');
+  addLine('constantly changing terrain, no map, something', 'line cyan');
+  addLine('always trying to find a way in. I'm good at that.', 'line cyan');
+  addBlank();
+  addLine('MS Cybersecurity @ Florida International University', 'line info');
+  addLine('GPA: 3.96  |  Graduating: April 2026', 'line info');
+  addLine('BS Electrical & Electronics @ Kathmandu University', 'line info');
+  addBlank();
+  addLine('Targeting: SOC Analyst | Cloud Security | IAM | Security Engineer', 'line warn');
+  addBlank();
+}
+
+function showSkills() {
+  addBlank();
+  addLine('technical stack', 'line section-header');
+  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addBlank();
+  addLine('SIEM & Detection', 'line cyan');
+  addLine('  Microsoft Sentinel  KQL  Splunk  MITRE ATT&CK  Defender XDR', 'line info');
+  addBlank();
+  addLine('Identity & Access Management', 'line cyan');
+  addLine('  Entra ID  RBAC  Conditional Access  PIM  Azure AD', 'line info');
+  addBlank();
+  addLine('Cloud Security', 'line cyan');
+  addLine('  Azure  Defender for Cloud  Logic Apps  Azure Monitor  AMA', 'line info');
+  addBlank();
+  addLine('Offensive Tools', 'line cyan');
+  addLine('  Nmap  Metasploit  Burp Suite  Nessus  Wireshark  John the Ripper', 'line info');
+  addBlank();
+  addLine('Frameworks', 'line cyan');
+  addLine('  NIST CSF  NIST 800-53  HIPAA  PCI-DSS  SOX  ISO 27001', 'line info');
+  addBlank();
+  addLine('Languages', 'line cyan');
+  addLine('  Python  C  JavaScript  MATLAB  PowerShell  KQL', 'line info');
+  addBlank();
+  addLine('ML & Research', 'line cyan');
+  addLine('  PyTorch  Hugging Face  Scikit-learn  GPT-2  RoBERTa', 'line info');
+  addBlank();
+}
+
+function showProjects() {
+  addBlank();
+  addLine('projects', 'line section-header');
+  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addBlank();
+
+  const projects = [
+    {
+      name: 'Microsoft Sentinel SIEM Lab',
+      desc: 'Cloud SOC environment on Azure. 8 custom KQL detection rules across 4 log sources. Threat intelligence watchlist. SOAR playbook via Logic Apps. 79 incidents fired.',
+      tags: ['Azure','Sentinel','KQL','Logic Apps','SOAR'],
+      url: 'https://github.com/slohani-22/Microsoft-Sentinel-SIEM-Lab'
+    },
+    {
+      name: 'Network Cyberattack Detection',
+      desc: 'Hybrid detection pipeline combining rule-based, anomaly, and LLM analysis. Fixed a code injection vulnerability in the process.',
+      tags: ['Python','GPT-3.5','ML'],
+      url: 'https://github.com/slohani-22/Network-Cyberattack-Detection'
+    },
+    {
+      name: 'Hallucination-Aware NLP',
+      desc: 'Reduced LLM hallucination rate from 89.5% to 61.5% without retraining. Published IEEE-format research report.',
+      tags: ['GPT-2','RoBERTa','HotpotQA'],
+      url: 'https://github.com/slohani-22/Hallucination-Aware-NLP'
+    },
+    {
+      name: 'AppointDoc',
+      desc: 'HIPAA-aligned healthcare booking platform with 5 distinct security layers including JWT auth, rate limiting, and input sanitization.',
+      tags: ['MERN','Node.js','MongoDB','HIPAA'],
+      url: 'https://github.com/slohani-22/AppointDoc'
+    },
+    {
+      name: 'Arrhythmia Detection BiLSTM',
+      desc: 'ECG arrhythmia classifier. Original MATLAB implementation reimplemented in PyTorch BiLSTM on PhysioNet dataset.',
+      tags: ['MATLAB','PyTorch','PhysioNet'],
+      url: 'https://github.com/slohani-22/Arrhythmia-Detection-BiLSTM'
+    },
+  ];
+
+  projects.forEach(p => {
+    addLine('<a href= + p.url +  target=_blank>→ ' + p.name + '</a>', 'line');
+    addLine('  ' + p.desc, 'line info');
+    const tagLine = p.tags.map(t => '<span class=tag>' + t + '</span>').join(' ');
+    addLine('  ' + tagLine, 'line');
+    addBlank();
+  });
+}
+
+function showCerts() {
+  addBlank();
+  addLine('certifications', 'line section-header');
+  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addBlank();
+  addLine('[✓] CompTIA Security+ SY0-701', 'line success');
+  addLine('    Score: 870  |  Passed: April 2026', 'line info');
+  addBlank();
+  addLine('[✓] AZ-500: Microsoft Azure Security Engineer Associate', 'line success');
+  addLine('    Passed: April 2026', 'line info');
+  addBlank();
+  addLine('[✓] Quantum Computing Engineer', 'line success');
+  addLine('    Japan Quantum Computing Association (JQCA)', 'line info');
+  addBlank();
+}
+
+function showContact() {
+  addBlank();
+  addLine('contact', 'line section-header');
+  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addBlank();
+  addLine('Email     <a href=mailto:sloha002@gmail.com>sloha002@gmail.com</a>', 'line info');
+  addLine('LinkedIn  <a href=https://linkedin.com/in/slohani22 target=_blank>linkedin.com/in/slohani22</a>', 'line info');
+  addLine('GitHub    <a href=https://github.com/slohani-22 target=_blank>github.com/slohani-22</a>', 'line info');
+  addBlank();
+  addLine('Open to entry-level cybersecurity roles. Anywhere in the US.', 'line warn');
+  addBlank();
+}
+
+const easterEggs = {
+  annapurna: {
+    caption: '4,130m. No signal. Best decision.',
+    text: [
+      'Annapurna Base Camp, Nepal.',
+      'The mountain doesn't care about your deadlines.',
+      'Everything makes sense up there.',
+    ]
+  },
+  abc: {
+    caption: 'Annapurna Base Camp. Worth every step.',
+    text: [
+      'Prayer flags at ABC.',
+      'Wind carries the prayers. Also your warmth.',
+      '13 days in. Zero regrets.',
+    ]
+  },
+  forest: {
+    caption: 'Before the deadlines. After the dal bhat.',
+    text: [
+      'Stone path somewhere in the hills.',
+      'Helmet in hand. No particular destination.',
+      'This version of me still exists. Just... elsewhere.',
+    ]
+  },
+  mist: {
+    caption: 'Still up there somewhere.',
+    text: [
+      'Standing on a hill at dusk.',
+      'No wifi. No notifications.',
+      'Just thinking.',
+    ]
+  },
+  ride: {
+    caption: 'Royal Enfield. Mountains. No plan. Perfect.',
+    text: [
+      'Royal Enfield Meteor 350.',
+      'High mountain pass. Zero visibility.',
+      'Helmet off because you earned it.',
+      'Some roads are worth the altitude sickness.',
+    ]
+  },
+  sunset: {
+    caption: 'Some skies are just different.',
+    text: [
+      'Not every view needs a mountain.',
+      'Sometimes the sky does all the work.',
+    ]
+  }
+};
+
+const secretCmds = {
+  sudo: () => {
+    addLine('Permission denied.', 'line error');
+    addLine('(Nice try though. Nobody gets root here.)', 'line dim');
+  },
+  hack: () => {
+    addLine('Scanning target...', 'line warn');
+    setTimeout(() => addLine('You've been in this portfolio for a while now.', 'line warn'), 600);
+    setTimeout(() => addLine('Browser: yours. Location: yes. Coffee today: not enough.', 'line warn'), 1200);
+    setTimeout(() => addLine('Consider yourself compromised. In a friendly way.', 'line success'), 1800);
+  },
+  'rm -rf /': () => {
+    addLine('CRITICAL: Deleting everything...', 'line error');
+    setTimeout(() => addLine('Just kidding. I'm not falling for that.', 'line success'), 800);
+    setTimeout(() => addLine('(Classic move though.)', 'line dim'), 1200);
+  },
+  nepal: () => {
+    addLine('Nepal.', 'line cyan');
+    addLine('Himalayas. Rhododendron forests. Dal bhat power.', 'line info');
+    addLine('Kathmandu chaos. Mountain silence.', 'line info');
+    addLine('The kind of place that gets into your DNA.', 'line info');
+    addLine('Haven't left it, even though I left it.', 'line dim');
+  },
+  'ls -la': () => {
+    addLine('total 48', 'line dim');
+    addLine('drwxr-xr-x  skills/', 'line info');
+    addLine('drwxr-xr-x  projects/', 'line info');
+    addLine('-rw-r--r--  .ambitions    [classified]', 'line warn');
+    addLine('-rw-r--r--  .regrets      [empty]', 'line success');
+    addLine('-rw-r--r--  .dal_bhat_recipes  [priceless]', 'line cyan');
+    addLine('-rw-r--r--  .mountain_memories  [uncompressed]', 'line cyan');
+  },
+  'zero-day': () => {
+    addLine('CVE-2026-SANSKAR', 'line error');
+    addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'line dim');
+    addLine('CVSS Score: 10.0 — CRITICAL', 'line error');
+    addLine('Description: Critical vulnerability discovered in the', 'line warn');
+    addLine('human tendency to underestimate entry-level candidates.', 'line warn');
+    addLine('Affects: Most hiring managers.', 'line warn');
+    addLine('Patch available: No.', 'line dim');
+    addLine('Workaround: Schedule an interview.', 'line success');
+  },
+  coffee: () => {
+    addLine('Brewing... ████████░░ 80%', 'line warn');
+    setTimeout(() => addLine('Error: caffeine dependency not found in cloud environment.', 'line error'), 800);
+    setTimeout(() => addLine('Falling back to KQL queries and determination.', 'line dim'), 1400);
+  },
+  'help --secret': () => {
+    addLine('Secret commands unlocked:', 'line section-header');
+    addLine('  sudo         try your luck', 'line dim');
+    addLine('  hack         you already are', 'line dim');
+    addLine('  rm -rf /     classic', 'line dim');
+    addLine('  nepal        where it started', 'line dim');
+    addLine('  ls -la       hidden files', 'line dim');
+    addLine('  zero-day     CVE-2026-SANSKAR', 'line dim');
+    addLine('  coffee       brewing failed', 'line dim');
+  }
+};
+
+function processCmd(raw) {
+  const cmd = raw.trim().toLowerCase();
+  if (!cmd) return;
+
+  addLine('<span class=prompt>sanskar@portfolio:~$</span> <span class=cmd>' + raw.replace(/</g,'&lt;') + '</span>', 'line');
+
+  if (cmd === 'clear') { out.innerHTML = ''; return; }
+  if (cmd === 'help') { showHelp(); return; }
+  if (cmd === 'whoami') { showWhoami(); return; }
+  if (cmd === 'skills') { showSkills(); return; }
+  if (cmd === 'projects') { showProjects(); return; }
+  if (cmd === 'certs') { showCerts(); return; }
+  if (cmd === 'contact') { showContact(); return; }
+
+  if (easterEggs[cmd]) {
+    const egg = easterEggs[cmd];
+    addBlank();
+    egg.text.forEach(t => addLine(t, 'line cyan'));
+    addBlank();
+    addImg(cmd, egg.caption);
+    addBlank();
+    return;
+  }
+
+  if (secretCmds[cmd]) {
+    addBlank();
+    secretCmds[cmd]();
+    addBlank();
+    return;
+  }
+
+  addLine('command not found: ' + cmd + '. Type 'help' for available commands.', 'line error');
+}
+
+input.addEventListener('keydown', e => {
+  if (booting) return;
+  if (e.key === 'Enter') {
+    const val = input.value;
+    history.unshift(val);
+    histIdx = -1;
+    input.value = '';
+    processCmd(val);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (histIdx < history.length - 1) {
+      histIdx++;
+      input.value = history[histIdx];
+    }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (histIdx > 0) {
+      histIdx--;
+      input.value = history[histIdx];
+    } else {
+      histIdx = -1;
+      input.value = '';
+    }
+  }
+});
+
+document.addEventListener('click', () => input.focus());
+
+boot();
+</script>
+</body>
+</html>
