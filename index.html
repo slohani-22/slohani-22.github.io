@@ -5,172 +5,239 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sanskar Lohani</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #0a0a0a;
-    color: #00ff88;
-    font-family: 'Courier New', Courier, monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 20px;
-  }
-  #terminal {
-    width: 100%;
-    max-width: 860px;
-    background: #0d0d0d;
-    border: 1px solid #1a1a1a;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 0 40px rgba(0,255,136,0.05);
-  }
-  #titlebar {
-    background: #1a1a1a;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot.red { background: #ff5f57; }
-  .dot.yellow { background: #febc2e; }
-  .dot.green { background: #28c840; }
-  #titlebar span { color: #555; font-size: 13px; margin-left: auto; margin-right: auto; }
-  #output {
-    padding: 20px;
-    min-height: 400px;
-    max-height: 75vh;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.8;
-    scroll-behavior: smooth;
-  }
-  #output::-webkit-scrollbar { width: 4px; }
-  #output::-webkit-scrollbar-track { background: #0d0d0d; }
-  #output::-webkit-scrollbar-thumb { background: #1a1a1a; }
-  .line { display: block; white-space: pre-wrap; word-break: break-word; }
-  .prompt { color: #00ff88; }
-  .cmd { color: #ffffff; }
-  .info { color: #888; }
-  .highlight { color: #00ff88; }
-  .warn { color: #febc2e; }
-  .error { color: #ff5f57; }
-  .success { color: #28c840; }
-  .dim { color: #444; }
-  .cyan { color: #00d4ff; }
-  .pink { color: #ff6eb4; }
-  .section-header { color: #00ff88; font-weight: bold; }
-  #input-line {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    border-top: 1px solid #1a1a1a;
-    background: #0d0d0d;
-  }
-  #prompt-label { color: #00ff88; white-space: nowrap; margin-right: 8px; font-size: 14px; }
-  #cmd-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #ffffff;
-    font-family: inherit;
-    font-size: 14px;
-    flex: 1;
-    caret-color: #00ff88;
-  }
-  .img-output {
-    margin: 10px 0;
-    border-radius: 4px;
-    overflow: hidden;
-    max-width: 100%;
-  }
-  .img-output img {
-    width: 100%;
-    max-height: 420px;
-    object-fit: cover;
-    display: block;
-    border-radius: 4px;
-    border: 1px solid #1a1a1a;
-  }
-  .img-caption {
-    color: #555;
-    font-size: 12px;
-    margin-top: 6px;
-    font-style: italic;
-  }
-  .help-grid {
-    display: grid;
-    grid-template-columns: 160px 1fr;
-    gap: 4px 16px;
-    margin: 8px 0;
-  }
-  .help-cmd { color: #00ff88; }
-  .help-desc { color: #666; }
-  a { color: #00d4ff; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-  .cursor { display: inline-block; width: 8px; height: 14px; background: #00ff88; animation: blink 1s infinite; vertical-align: middle; margin-left: 2px; }
-  .tag { background: #1a1a1a; color: #00ff88; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin: 2px; display: inline-block; border: 1px solid #222; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a0a;
+  color: #00ff88;
+  font-family: 'Courier New', Courier, monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+#matrix-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+#wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+#hero {
+  text-align: center;
+}
+
+#hero h1 {
+  font-size: 64px;
+  font-weight: 900;
+  color: #00ff88;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 0 30px rgba(0,255,136,0.3);
+}
+
+#hero p {
+  color: #444;
+  font-size: 13px;
+  margin-top: 6px;
+  letter-spacing: 2px;
+}
+
+#terminal {
+  width: 100%;
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#titlebar {
+  background: #161616;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.dot { width: 13px; height: 13px; border-radius: 50%; }
+.dot.red { background: #ff5f57; }
+.dot.yellow { background: #febc2e; }
+.dot.green { background: #28c840; }
+#titlebar span { color: #444; font-size: 13px; margin-left: auto; margin-right: auto; letter-spacing: 1px; }
+
+#output {
+  padding: 24px;
+  min-height: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+  font-size: 16px;
+  line-height: 2;
+}
+
+#output::-webkit-scrollbar { width: 4px; }
+#output::-webkit-scrollbar-track { background: #0d0d0d; }
+#output::-webkit-scrollbar-thumb { background: #1e1e1e; }
+
+.line { display: block; white-space: pre-wrap; word-break: break-word; }
+.info { color: #777; }
+.hdr { color: #00ff88; font-weight: bold; font-size: 17px; }
+.warn { color: #febc2e; }
+.err { color: #ff5f57; }
+.ok { color: #28c840; }
+.dim { color: #333; }
+.cyan { color: #00d4ff; }
+.white { color: #ffffff; }
+.pink { color: #ff6eb4; }
+
+#input-line {
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  border-top: 1px solid #1e1e1e;
+  background: #0d0d0d;
+  gap: 10px;
+}
+
+#prompt-label {
+  color: #00ff88;
+  white-space: nowrap;
+  font-size: 16px;
+  user-select: none;
+}
+
+#cmd-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 16px;
+  flex: 1;
+  caret-color: #00ff88;
+}
+
+.img-wrap {
+  margin: 12px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.img-wrap img {
+  width: 100%;
+  max-height: 440px;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+  border: 1px solid #1e1e1e;
+}
+
+.img-cap {
+  color: #444;
+  font-size: 12px;
+  margin-top: 6px;
+  font-style: italic;
+  padding-left: 2px;
+}
+
+.tag {
+  background: #161616;
+  color: #00ff88;
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 13px;
+  margin: 2px;
+  display: inline-block;
+  border: 1px solid #1e1e1e;
+}
+
+.help-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 2px 12px;
+  margin: 2px 0;
+}
+
+.hcmd { color: #00ff88; }
+.hdesc { color: #555; }
+
+a { color: #00d4ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.sep { color: #1e1e1e; }
 </style>
 </head>
 <body>
 
-<div id="terminal">
-  <div id="titlebar">
-    <div class="dot red"></div>
-    <div class="dot yellow"></div>
-    <div class="dot green"></div>
-    <span>sanskar@portfolio ~ bash</span>
+<canvas id="matrix-canvas"></canvas>
+
+<div id="wrap">
+
+  <div id="hero">
+    <h1>Sanskar</h1>
+    <p>cybersecurity engineer &nbsp;·&nbsp; cloud threat hunter &nbsp;·&nbsp; former mountain person</p>
   </div>
-  <div id="output"></div>
-  <div id="input-line">
-    <span id="prompt-label">sanskar@portfolio:~$</span>
-    <input id="cmd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus />
+
+  <div id="terminal">
+    <div id="titlebar">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+      <span>sanskar@portfolio ~ bash</span>
+    </div>
+    <div id="output"></div>
+    <div id="input-line">
+      <span id="prompt-label">sanskar@portfolio:~$</span>
+      <input id="cmd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus />
+    </div>
   </div>
+
 </div>
 
 <script>
 const PHOTOS = {
-  annapurna:  + photos[annapurna] + ,
-  abc:  + photos[abc] + ,
-  forest:  + photos[forest] + ,
-  mist:  + photos[mist] + ,
-  ride:  + photos[ride] + ,
-  sunset:  + photos[sunset] + 
+  annapurna: "photos/annapurna.jpeg",
+  abc: "photos/abc.jpeg",
+  forest: "photos/forest.jpeg",
+  mist: "photos/mist.jpeg",
+  ride: "photos/ride.jpeg",
+  sunset: "photos/sunset.jpeg"
 };
 
 const out = document.getElementById('output');
 const input = document.getElementById('cmd-input');
-let booting = false;
-let history = [];
+let cmdHistory = [];
 let histIdx = -1;
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-function addLine(text, cls='line info') {
+function addLine(html, cls) {
   const el = document.createElement('span');
-  el.className = cls;
-  el.innerHTML = text;
+  el.className = 'line ' + (cls || 'info');
+  el.innerHTML = html;
   out.appendChild(el);
   out.appendChild(document.createElement('br'));
-  out.scrollTop = out.scrollHeight;
-  return el;
-}
-
-function addImg(key, caption) {
-  const wrap = document.createElement('div');
-  wrap.className = 'img-output';
-  const img = document.createElement('img');
-  img.src = 'data:image/jpeg;base64,' + PHOTOS[key];
-  img.alt = caption;
-  const cap = document.createElement('div');
-  cap.className = 'img-caption';
-  cap.textContent = caption;
-  wrap.appendChild(img);
-  wrap.appendChild(cap);
-  out.appendChild(wrap);
   out.scrollTop = out.scrollHeight;
 }
 
@@ -178,325 +245,316 @@ function addBlank() {
   out.appendChild(document.createElement('br'));
 }
 
-async function typeText(text, cls='line info', delay=18) {
+function addImg(key, caption) {
+  const wrap = document.createElement('div');
+  wrap.className = 'img-wrap';
+  const img = document.createElement('img');
+  img.src = PHOTOS[key];
+  img.alt = caption;
+  const cap = document.createElement('div');
+  cap.className = 'img-cap';
+  cap.textContent = caption;
+  wrap.appendChild(img);
+  wrap.appendChild(cap);
+  out.appendChild(wrap);
+  out.scrollTop = out.scrollHeight;
+}
+
+async function typeText(text, cls, delay) {
+  delay = delay || 16;
   const el = document.createElement('span');
-  el.className = cls;
+  el.className = 'line ' + (cls || 'info');
   out.appendChild(el);
   out.appendChild(document.createElement('br'));
-  for (let ch of text) {
-    el.textContent += ch;
+  for (let i = 0; i < text.length; i++) {
+    el.textContent += text[i];
     out.scrollTop = out.scrollHeight;
     await sleep(delay);
   }
 }
 
 async function boot() {
-  await sleep(300);
-  await typeText('Initializing...', 'line dim', 30);
   await sleep(200);
-  await typeText('Loading kernel modules... [OK]', 'line dim', 20);
+  await typeText('Booting system...', 'dim', 25);
   await sleep(150);
-  await typeText('Mounting filesystem... [OK]', 'line dim', 20);
-  await sleep(200);
-  await typeText('Establishing secure connection... [OK]', 'line dim', 20);
-  await sleep(400);
+  await typeText('Loading threat intel... [OK]', 'dim', 18);
+  await sleep(100);
+  await typeText('Mounting KQL engine... [OK]', 'dim', 18);
+  await sleep(100);
+  await typeText('Establishing secure shell... [OK]', 'dim', 18);
+  await sleep(300);
   addBlank();
-  await typeText('Welcome to Sanskar's Terminal', 'line section-header', 25);
-  await sleep(200);
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
-  await typeText('  Cybersecurity Engineer. Cloud threat hunter.', 'line cyan', 20);
-  await typeText('  Former mountain person. Motorcycle enthusiast.', 'line cyan', 20);
-  await typeText('  MS Cybersecurity @ FIU ' 26  |  Miami, FL', 'line cyan', 20);
+  await typeText('  MS Cybersecurity · FIU \'26  |  AZ-500 · Security+', 'cyan', 14);
+  await typeText('  SOC · Cloud Security · IAM · Detection Engineering', 'cyan', 14);
   addBlank();
-  addLine('  <span class=tag>AZ-500</span> <span class=tag>Security+</span> <span class=tag>Microsoft Sentinel</span> <span class=tag>KQL</span> <span class=tag>Azure</span>', 'line');
+  addLine('  <span class="tag">Microsoft Sentinel</span> <span class="tag">KQL</span> <span class="tag">Azure</span> <span class="tag">Entra ID</span> <span class="tag">Logic Apps</span>', 'line');
   addBlank();
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
-  await typeText('Type a command below. Start with 'help' if you're new here.', 'line info', 18);
+  await typeText('  Type a command. Start with \'help\' if you\'re new here.', 'info', 14);
   addBlank();
-  booting = false;
-  input.focus();
 }
 
 function showHelp() {
   addBlank();
-  addLine('Available commands:', 'line section-header');
+  addLine('available commands', 'hdr');
   addBlank();
-  const grid = document.createElement('div');
-  grid.className = 'help-grid';
+
   const cmds = [
-    ['whoami','who is this person'],
-    ['skills','technical arsenal'],
-    ['projects','things built'],
-    ['certs','credentials earned'],
-    ['contact','find me'],
-    ['annapurna','easter egg #1'],
-    ['abc','easter egg #2'],
-    ['forest','easter egg #3'],
-    ['mist','easter egg #4'],
-    ['ride','easter egg #5'],
-    ['sunset','easter egg #6'],
-    ['clear','clean the slate'],
-    ['help','show this menu'],
+    ['whoami', 'who is this person'],
+    ['skills', 'technical arsenal'],
+    ['projects', 'things built'],
+    ['certs', 'credentials earned'],
+    ['contact', 'find me'],
+    ['─────────', '─────────────────────'],
+    ['annapurna', 'easter egg #1'],
+    ['abc', 'easter egg #2'],
+    ['forest', 'easter egg #3'],
+    ['mist', 'easter egg #4'],
+    ['ride', 'easter egg #5'],
+    ['sunset', 'easter egg #6'],
+    ['─────────', '─────────────────────'],
+    ['clear', 'clean the slate'],
+    ['help', 'show this menu'],
   ];
-  cmds.forEach(([cmd, desc]) => {
+
+  cmds.forEach(function(pair) {
+    const row = document.createElement('div');
+    row.className = 'help-row';
     const c = document.createElement('span');
-    c.className = 'help-cmd';
-    c.textContent = cmd;
+    c.className = pair[0].startsWith('─') ? 'hdesc' : 'hcmd';
+    c.textContent = pair[0];
     const d = document.createElement('span');
-    d.className = 'help-desc';
-    d.textContent = '— ' + desc;
-    grid.appendChild(c);
-    grid.appendChild(d);
+    d.className = 'hdesc';
+    d.textContent = pair[0].startsWith('─') ? '' : '— ' + pair[1];
+    row.appendChild(c);
+    row.appendChild(d);
+    out.appendChild(row);
   });
-  out.appendChild(grid);
   addBlank();
   out.scrollTop = out.scrollHeight;
 }
 
 function showWhoami() {
   addBlank();
-  addLine('sanskar lohani', 'line section-header');
-  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addLine('sanskar lohani', 'hdr');
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
-  addLine('Originally from Nepal. Grew up trekking mountains,', 'line info');
-  addLine('riding motorcycles on roads that probably shouldn't', 'line info');
-  addLine('exist. Somewhere along the way, ended up in Miami', 'line info');
-  addLine('chasing zero-days instead of summits.', 'line info');
+  addLine('Originally from Nepal. Grew up trekking mountains,', 'info');
+  addLine('riding motorcycles on roads that probably shouldn\'t exist.', 'info');
+  addLine('Somewhere along the way, ended up in Miami', 'info');
+  addLine('chasing zero-days instead of summits.', 'info');
   addBlank();
-  addLine('Cybersecurity is its own kind of wilderness —', 'line cyan');
-  addLine('constantly changing terrain, no map, something', 'line cyan');
-  addLine('always trying to find a way in. I'm good at that.', 'line cyan');
+  addLine('Cybersecurity is its own kind of wilderness —', 'cyan');
+  addLine('constantly changing terrain, no map, something', 'cyan');
+  addLine('always trying to find a way in. I\'m good at that.', 'cyan');
   addBlank();
-  addLine('MS Cybersecurity @ Florida International University', 'line info');
-  addLine('GPA: 3.96  |  Graduating: April 2026', 'line info');
-  addLine('BS Electrical & Electronics @ Kathmandu University', 'line info');
+  addLine('MS Cybersecurity @ Florida International University', 'info');
+  addLine('GPA: 3.96  |  Graduating: April 2026', 'info');
+  addLine('BS Electrical & Electronics @ Kathmandu University', 'info');
   addBlank();
-  addLine('Targeting: SOC Analyst | Cloud Security | IAM | Security Engineer', 'line warn');
+  addLine('Targeting: SOC Analyst  |  Cloud Security  |  IAM Analyst  |  Security Engineer', 'warn');
   addBlank();
 }
 
 function showSkills() {
   addBlank();
-  addLine('technical stack', 'line section-header');
-  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addLine('technical stack', 'hdr');
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
-  addLine('SIEM & Detection', 'line cyan');
-  addLine('  Microsoft Sentinel  KQL  Splunk  MITRE ATT&CK  Defender XDR', 'line info');
+  addLine('SIEM & Detection', 'cyan');
+  addLine('  Microsoft Sentinel   KQL   Splunk   MITRE ATT&CK   Defender XDR', 'info');
   addBlank();
-  addLine('Identity & Access Management', 'line cyan');
-  addLine('  Entra ID  RBAC  Conditional Access  PIM  Azure AD', 'line info');
+  addLine('Identity & Access Management', 'cyan');
+  addLine('  Entra ID   RBAC   Conditional Access   PIM   Azure AD', 'info');
   addBlank();
-  addLine('Cloud Security', 'line cyan');
-  addLine('  Azure  Defender for Cloud  Logic Apps  Azure Monitor  AMA', 'line info');
+  addLine('Cloud Security', 'cyan');
+  addLine('  Azure   Defender for Cloud   Logic Apps   Azure Monitor   AMA', 'info');
   addBlank();
-  addLine('Offensive Tools', 'line cyan');
-  addLine('  Nmap  Metasploit  Burp Suite  Nessus  Wireshark  John the Ripper', 'line info');
+  addLine('Offensive Tools', 'cyan');
+  addLine('  Nmap   Metasploit   Burp Suite   Nessus   Wireshark   John the Ripper', 'info');
   addBlank();
-  addLine('Frameworks', 'line cyan');
-  addLine('  NIST CSF  NIST 800-53  HIPAA  PCI-DSS  SOX  ISO 27001', 'line info');
+  addLine('Frameworks', 'cyan');
+  addLine('  NIST CSF   NIST 800-53   HIPAA   PCI-DSS   SOX   ISO 27001', 'info');
   addBlank();
-  addLine('Languages', 'line cyan');
-  addLine('  Python  C  JavaScript  MATLAB  PowerShell  KQL', 'line info');
+  addLine('Languages', 'cyan');
+  addLine('  Python   C   JavaScript   MATLAB   PowerShell   KQL', 'info');
   addBlank();
-  addLine('ML & Research', 'line cyan');
-  addLine('  PyTorch  Hugging Face  Scikit-learn  GPT-2  RoBERTa', 'line info');
+  addLine('ML & Research', 'cyan');
+  addLine('  PyTorch   Hugging Face   Scikit-learn   GPT-2   RoBERTa', 'info');
   addBlank();
 }
 
 function showProjects() {
   addBlank();
-  addLine('projects', 'line section-header');
-  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addLine('projects', 'hdr');
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
 
-  const projects = [
+  var projects = [
     {
       name: 'Microsoft Sentinel SIEM Lab',
-      desc: 'Cloud SOC environment on Azure. 8 custom KQL detection rules across 4 log sources. Threat intelligence watchlist. SOAR playbook via Logic Apps. 79 incidents fired.',
-      tags: ['Azure','Sentinel','KQL','Logic Apps','SOAR'],
+      desc: 'Cloud SOC on Azure. 8 custom KQL detection rules across 4 log sources. Threat intelligence watchlist. SOAR via Logic Apps. 79 incidents fired.',
+      tags: ['Azure', 'Sentinel', 'KQL', 'Logic Apps', 'SOAR'],
       url: 'https://github.com/slohani-22/Microsoft-Sentinel-SIEM-Lab'
     },
     {
       name: 'Network Cyberattack Detection',
-      desc: 'Hybrid detection pipeline combining rule-based, anomaly, and LLM analysis. Fixed a code injection vulnerability in the process.',
-      tags: ['Python','GPT-3.5','ML'],
+      desc: 'Hybrid detection pipeline — rule-based, anomaly, and LLM. Fixed a code injection vulnerability discovered during development.',
+      tags: ['Python', 'GPT-3.5', 'ML'],
       url: 'https://github.com/slohani-22/Network-Cyberattack-Detection'
     },
     {
       name: 'Hallucination-Aware NLP',
-      desc: 'Reduced LLM hallucination rate from 89.5% to 61.5% without retraining. Published IEEE-format research report.',
-      tags: ['GPT-2','RoBERTa','HotpotQA'],
+      desc: 'Reduced LLM hallucination from 89.5% to 61.5% without retraining. IEEE-format research report published.',
+      tags: ['GPT-2', 'RoBERTa', 'HotpotQA'],
       url: 'https://github.com/slohani-22/Hallucination-Aware-NLP'
     },
     {
       name: 'AppointDoc',
-      desc: 'HIPAA-aligned healthcare booking platform with 5 distinct security layers including JWT auth, rate limiting, and input sanitization.',
-      tags: ['MERN','Node.js','MongoDB','HIPAA'],
+      desc: 'HIPAA-aligned healthcare booking platform with 5 distinct security layers — JWT auth, rate limiting, input sanitization.',
+      tags: ['MERN', 'Node.js', 'MongoDB', 'HIPAA'],
       url: 'https://github.com/slohani-22/AppointDoc'
     },
     {
       name: 'Arrhythmia Detection BiLSTM',
-      desc: 'ECG arrhythmia classifier. Original MATLAB implementation reimplemented in PyTorch BiLSTM on PhysioNet dataset.',
-      tags: ['MATLAB','PyTorch','PhysioNet'],
+      desc: 'ECG arrhythmia classifier. MATLAB original reimplemented as PyTorch BiLSTM on PhysioNet dataset.',
+      tags: ['MATLAB', 'PyTorch', 'PhysioNet'],
       url: 'https://github.com/slohani-22/Arrhythmia-Detection-BiLSTM'
-    },
+    }
   ];
 
-  projects.forEach(p => {
-    addLine('<a href= + p.url +  target=_blank>→ ' + p.name + '</a>', 'line');
-    addLine('  ' + p.desc, 'line info');
-    const tagLine = p.tags.map(t => '<span class=tag>' + t + '</span>').join(' ');
-    addLine('  ' + tagLine, 'line');
+  projects.forEach(function(p) {
+    addLine('<a href="' + p.url + '" target="_blank">→ ' + p.name + '</a>', 'line');
+    addLine('  ' + p.desc, 'info');
+    var tagHtml = p.tags.map(function(t) { return '<span class="tag">' + t + '</span>'; }).join(' ');
+    addLine('  ' + tagHtml, 'line');
     addBlank();
   });
 }
 
 function showCerts() {
   addBlank();
-  addLine('certifications', 'line section-header');
-  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addLine('certifications', 'hdr');
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
-  addLine('[✓] CompTIA Security+ SY0-701', 'line success');
-  addLine('    Score: 870  |  Passed: April 2026', 'line info');
+  addLine('[✓] CompTIA Security+ SY0-701', 'ok');
+  addLine('    Score: 870  |  Passed: April 2026', 'info');
   addBlank();
-  addLine('[✓] AZ-500: Microsoft Azure Security Engineer Associate', 'line success');
-  addLine('    Passed: April 2026', 'line info');
+  addLine('[✓] AZ-500: Microsoft Azure Security Engineer Associate', 'ok');
+  addLine('    Passed: April 2026', 'info');
   addBlank();
-  addLine('[✓] Quantum Computing Engineer', 'line success');
-  addLine('    Japan Quantum Computing Association (JQCA)', 'line info');
+  addLine('[✓] Quantum Computing Engineer', 'ok');
+  addLine('    Japan Quantum Computing Association (JQCA)', 'info');
   addBlank();
 }
 
 function showContact() {
   addBlank();
-  addLine('contact', 'line section-header');
-  addLine('━━━━━━━━━━━━━━━━━━━━', 'line dim');
+  addLine('contact', 'hdr');
+  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
-  addLine('Email     <a href=mailto:sloha002@gmail.com>sloha002@gmail.com</a>', 'line info');
-  addLine('LinkedIn  <a href=https://linkedin.com/in/slohani22 target=_blank>linkedin.com/in/slohani22</a>', 'line info');
-  addLine('GitHub    <a href=https://github.com/slohani-22 target=_blank>github.com/slohani-22</a>', 'line info');
+  addLine('Email      <a href="mailto:sloha002@gmail.com">sloha002@gmail.com</a>', 'info');
+  addLine('LinkedIn   <a href="https://linkedin.com/in/slohani22" target="_blank">linkedin.com/in/slohani22</a>', 'info');
+  addLine('GitHub     <a href="https://github.com/slohani-22" target="_blank">github.com/slohani-22</a>', 'info');
   addBlank();
-  addLine('Open to entry-level cybersecurity roles. Anywhere in the US.', 'line warn');
+  addLine('Open to entry-level cybersecurity roles. Anywhere in the US.', 'warn');
   addBlank();
 }
 
-const easterEggs = {
+var eggs = {
   annapurna: {
-    caption: '4,130m. No signal. Best decision.',
-    text: [
-      'Annapurna Base Camp, Nepal.',
-      'The mountain doesn't care about your deadlines.',
-      'Everything makes sense up there.',
-    ]
+    lines: ['Annapurna, Nepal.', 'The mountain doesn\'t care about your deadlines.', 'Everything makes sense up there.'],
+    caption: '4,130m. No signal. Best decision.'
   },
   abc: {
-    caption: 'Annapurna Base Camp. Worth every step.',
-    text: [
-      'Prayer flags at ABC.',
-      'Wind carries the prayers. Also your warmth.',
-      '13 days in. Zero regrets.',
-    ]
+    lines: ['Prayer flags at Annapurna Base Camp.', 'Wind carries the prayers. Also your warmth.', '13 days in. Zero regrets.'],
+    caption: 'Annapurna Base Camp. Worth every step.'
   },
   forest: {
-    caption: 'Before the deadlines. After the dal bhat.',
-    text: [
-      'Stone path somewhere in the hills.',
-      'Helmet in hand. No particular destination.',
-      'This version of me still exists. Just... elsewhere.',
-    ]
+    lines: ['Stone path somewhere in the hills.', 'Helmet in hand. No particular destination.', 'This version of me still exists. Just... elsewhere.'],
+    caption: 'Before the deadlines. After the dal bhat.'
   },
   mist: {
-    caption: 'Still up there somewhere.',
-    text: [
-      'Standing on a hill at dusk.',
-      'No wifi. No notifications.',
-      'Just thinking.',
-    ]
+    lines: ['Standing on a hill at dusk.', 'No wifi. No notifications.', 'Just thinking.'],
+    caption: 'Still up there somewhere.'
   },
   ride: {
-    caption: 'Royal Enfield. Mountains. No plan. Perfect.',
-    text: [
-      'Royal Enfield Meteor 350.',
-      'High mountain pass. Zero visibility.',
-      'Helmet off because you earned it.',
-      'Some roads are worth the altitude sickness.',
-    ]
+    lines: ['Royal Enfield Meteor 350.', 'High mountain pass. Zero visibility.', 'Helmet off because you earned it.', 'Some roads are worth the altitude sickness.'],
+    caption: 'Royal Enfield. Mountains. No plan. Perfect.'
   },
   sunset: {
-    caption: 'Some skies are just different.',
-    text: [
-      'Not every view needs a mountain.',
-      'Sometimes the sky does all the work.',
-    ]
+    lines: ['Not every view needs a mountain.', 'Sometimes the sky does all the work.'],
+    caption: 'Some skies are just different.'
   }
 };
 
-const secretCmds = {
-  sudo: () => {
-    addLine('Permission denied.', 'line error');
-    addLine('(Nice try though. Nobody gets root here.)', 'line dim');
+var secrets = {
+  'sudo': function() {
+    addLine('Permission denied.', 'err');
+    addLine('(Nice try. Nobody gets root here.)', 'dim');
   },
-  hack: () => {
-    addLine('Scanning target...', 'line warn');
-    setTimeout(() => addLine('You've been in this portfolio for a while now.', 'line warn'), 600);
-    setTimeout(() => addLine('Browser: yours. Location: yes. Coffee today: not enough.', 'line warn'), 1200);
-    setTimeout(() => addLine('Consider yourself compromised. In a friendly way.', 'line success'), 1800);
+  'hack': function() {
+    addLine('Scanning target...', 'warn');
+    setTimeout(function() { addLine('You\'ve been in this portfolio for a while now.', 'warn'); }, 600);
+    setTimeout(function() { addLine('Browser: yours. Location: yes. Coffee today: not enough.', 'warn'); }, 1200);
+    setTimeout(function() { addLine('Consider yourself compromised. In a friendly way.', 'ok'); }, 1800);
   },
-  'rm -rf /': () => {
-    addLine('CRITICAL: Deleting everything...', 'line error');
-    setTimeout(() => addLine('Just kidding. I'm not falling for that.', 'line success'), 800);
-    setTimeout(() => addLine('(Classic move though.)', 'line dim'), 1200);
+  'rm -rf /': function() {
+    addLine('CRITICAL: Deleting everything...', 'err');
+    setTimeout(function() { addLine('Just kidding. I\'m not falling for that.', 'ok'); }, 900);
+    setTimeout(function() { addLine('(Classic move though.)', 'dim'); }, 1400);
   },
-  nepal: () => {
-    addLine('Nepal.', 'line cyan');
-    addLine('Himalayas. Rhododendron forests. Dal bhat power.', 'line info');
-    addLine('Kathmandu chaos. Mountain silence.', 'line info');
-    addLine('The kind of place that gets into your DNA.', 'line info');
-    addLine('Haven't left it, even though I left it.', 'line dim');
+  'nepal': function() {
+    addLine('Nepal.', 'cyan');
+    addLine('Himalayas. Rhododendron forests. Dal bhat power.', 'info');
+    addLine('Kathmandu chaos. Mountain silence.', 'info');
+    addLine('The kind of place that gets into your DNA.', 'info');
+    addLine('Haven\'t left it, even though I left it.', 'dim');
   },
-  'ls -la': () => {
-    addLine('total 48', 'line dim');
-    addLine('drwxr-xr-x  skills/', 'line info');
-    addLine('drwxr-xr-x  projects/', 'line info');
-    addLine('-rw-r--r--  .ambitions    [classified]', 'line warn');
-    addLine('-rw-r--r--  .regrets      [empty]', 'line success');
-    addLine('-rw-r--r--  .dal_bhat_recipes  [priceless]', 'line cyan');
-    addLine('-rw-r--r--  .mountain_memories  [uncompressed]', 'line cyan');
+  'ls -la': function() {
+    addLine('total 48', 'dim');
+    addLine('drwxr-xr-x  skills/', 'info');
+    addLine('drwxr-xr-x  projects/', 'info');
+    addLine('-rw-r--r--  .ambitions        [classified]', 'warn');
+    addLine('-rw-r--r--  .regrets          [empty]', 'ok');
+    addLine('-rw-r--r--  .dal_bhat_recipes [priceless]', 'cyan');
+    addLine('-rw-r--r--  .mountain_memories [uncompressed]', 'cyan');
   },
-  'zero-day': () => {
-    addLine('CVE-2026-SANSKAR', 'line error');
-    addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'line dim');
-    addLine('CVSS Score: 10.0 — CRITICAL', 'line error');
-    addLine('Description: Critical vulnerability discovered in the', 'line warn');
-    addLine('human tendency to underestimate entry-level candidates.', 'line warn');
-    addLine('Affects: Most hiring managers.', 'line warn');
-    addLine('Patch available: No.', 'line dim');
-    addLine('Workaround: Schedule an interview.', 'line success');
+  'zero-day': function() {
+    addLine('CVE-2026-SANSKAR', 'err');
+    addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
+    addLine('CVSS Score: 10.0 — CRITICAL', 'err');
+    addLine('Description: Critical vulnerability in the human tendency', 'warn');
+    addLine('to underestimate entry-level candidates.', 'warn');
+    addLine('Affects: Most hiring managers.', 'warn');
+    addLine('Patch available: No.', 'dim');
+    addLine('Workaround: Schedule an interview.', 'ok');
   },
-  coffee: () => {
-    addLine('Brewing... ████████░░ 80%', 'line warn');
-    setTimeout(() => addLine('Error: caffeine dependency not found in cloud environment.', 'line error'), 800);
-    setTimeout(() => addLine('Falling back to KQL queries and determination.', 'line dim'), 1400);
+  'coffee': function() {
+    addLine('Brewing... ████████░░ 80%', 'warn');
+    setTimeout(function() { addLine('Error: caffeine dependency not found in cloud environment.', 'err'); }, 900);
+    setTimeout(function() { addLine('Falling back to KQL queries and determination.', 'dim'); }, 1500);
   },
-  'help --secret': () => {
-    addLine('Secret commands unlocked:', 'line section-header');
-    addLine('  sudo         try your luck', 'line dim');
-    addLine('  hack         you already are', 'line dim');
-    addLine('  rm -rf /     classic', 'line dim');
-    addLine('  nepal        where it started', 'line dim');
-    addLine('  ls -la       hidden files', 'line dim');
-    addLine('  zero-day     CVE-2026-SANSKAR', 'line dim');
-    addLine('  coffee       brewing failed', 'line dim');
+  'help --secret': function() {
+    addLine('Secret commands:', 'hdr');
+    addLine('  sudo          try your luck', 'dim');
+    addLine('  hack          you already are', 'dim');
+    addLine('  rm -rf /      classic', 'dim');
+    addLine('  nepal         where it started', 'dim');
+    addLine('  ls -la        hidden files', 'dim');
+    addLine('  zero-day      CVE-2026-SANSKAR', 'dim');
+    addLine('  coffee        brewing failed', 'dim');
   }
 };
 
 function processCmd(raw) {
-  const cmd = raw.trim().toLowerCase();
+  var cmd = raw.trim().toLowerCase();
   if (!cmd) return;
 
-  addLine('<span class=prompt>sanskar@portfolio:~$</span> <span class=cmd>' + raw.replace(/</g,'&lt;') + '</span>', 'line');
+  addLine('<span class="highlight">sanskar@portfolio:~$</span> <span class="white">' + raw.replace(/</g, '&lt;') + '</span>', 'line');
 
   if (cmd === 'clear') { out.innerHTML = ''; return; }
   if (cmd === 'help') { showHelp(); return; }
@@ -506,44 +564,43 @@ function processCmd(raw) {
   if (cmd === 'certs') { showCerts(); return; }
   if (cmd === 'contact') { showContact(); return; }
 
-  if (easterEggs[cmd]) {
-    const egg = easterEggs[cmd];
+  if (eggs[cmd]) {
     addBlank();
-    egg.text.forEach(t => addLine(t, 'line cyan'));
+    eggs[cmd].lines.forEach(function(t) { addLine(t, 'cyan'); });
     addBlank();
-    addImg(cmd, egg.caption);
-    addBlank();
-    return;
-  }
-
-  if (secretCmds[cmd]) {
-    addBlank();
-    secretCmds[cmd]();
+    addImg(cmd, eggs[cmd].caption);
     addBlank();
     return;
   }
 
-  addLine('command not found: ' + cmd + '. Type 'help' for available commands.', 'line error');
+  if (secrets[cmd]) {
+    addBlank();
+    secrets[cmd]();
+    addBlank();
+    return;
+  }
+
+  addLine('command not found: ' + cmd + '   try \'help\'', 'err');
 }
 
-input.addEventListener('keydown', e => {
+input.addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
-    const val = input.value;
-    history.unshift(val);
+    var val = input.value;
+    if (val.trim()) cmdHistory.unshift(val);
     histIdx = -1;
     input.value = '';
     processCmd(val);
   } else if (e.key === 'ArrowUp') {
     e.preventDefault();
-    if (histIdx < history.length - 1) {
+    if (histIdx < cmdHistory.length - 1) {
       histIdx++;
-      input.value = history[histIdx];
+      input.value = cmdHistory[histIdx];
     }
   } else if (e.key === 'ArrowDown') {
     e.preventDefault();
     if (histIdx > 0) {
       histIdx--;
-      input.value = history[histIdx];
+      input.value = cmdHistory[histIdx];
     } else {
       histIdx = -1;
       input.value = '';
@@ -551,7 +608,38 @@ input.addEventListener('keydown', e => {
   }
 });
 
-document.addEventListener('click', () => input.focus());
+document.addEventListener('click', function() { input.focus(); });
+
+// Matrix rain
+var canvas = document.getElementById('matrix-canvas');
+var ctx = canvas.getContext('2d');
+var cols, drops;
+
+function initMatrix() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cols = Math.floor(canvas.width / 20);
+  drops = [];
+  for (var i = 0; i < cols; i++) drops[i] = Math.random() * -100;
+}
+
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(10,10,10,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff88';
+  ctx.font = '14px Courier New';
+  var chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+  for (var i = 0; i < drops.length; i++) {
+    var ch = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(ch, i * 20, drops[i] * 20);
+    if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+
+initMatrix();
+setInterval(drawMatrix, 50);
+window.addEventListener('resize', initMatrix);
 
 boot();
 </script>
