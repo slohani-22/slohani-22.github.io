@@ -27,7 +27,7 @@ body {
   width: 100%;
   height: 100%;
   z-index: 0;
-  opacity: 0.12;
+  opacity: 0.22;
   pointer-events: none;
 }
 
@@ -100,7 +100,7 @@ body {
 #output::-webkit-scrollbar-thumb { background: #1e1e1e; }
 
 .line { display: block; white-space: pre-wrap; word-break: break-word; }
-.info { color: #777; }
+.info { color: #aaa; }
 .hdr { color: #00ff88; font-weight: bold; font-size: 17px; }
 .warn { color: #febc2e; }
 .err { color: #ff5f57; }
@@ -146,15 +146,15 @@ body {
 
 .img-wrap img {
   width: 100%;
-  max-height: 440px;
-  object-fit: cover;
+  max-height: none;
+  object-fit: contain;
   display: block;
   border-radius: 6px;
   border: 1px solid #1e1e1e;
 }
 
 .img-cap {
-  color: #444;
+  color: #aaa;
   font-size: 12px;
   margin-top: 6px;
   font-style: italic;
@@ -624,9 +624,9 @@ function initMatrix() {
 }
 
 function drawMatrix() {
-  ctx.fillStyle = 'rgba(10,10,10,0.05)';
+  ctx.fillStyle = 'rgba(10,10,10,0.04)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#00ff88';
+  ctx.fillStyle = '#00ff66';
   ctx.font = '14px Courier New';
   var chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
   for (var i = 0; i < drops.length; i++) {
