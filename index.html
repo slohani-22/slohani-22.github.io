@@ -1,664 +1,550 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sanskar Lohani</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sanskar Lohani — IAM &amp; Cloud Security</title>
+  <meta name="description" content="IAM and cloud security labs on AWS and Azure: SAML/OIDC federation, least-privilege IAM, access automation, and Microsoft Sentinel detections. M.S. Cybersecurity (FIU), AZ-500, Security+.">
+  <meta name="theme-color" content="#121418">
+  <link rel="canonical" href="https://slohani-22.github.io/">
 
-body {
-  background: #0a0a0a;
-  color: #00ff88;
-  font-family: 'Courier New', Courier, monospace;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  position: relative;
-  overflow-x: hidden;
-}
+  <!-- Link preview (LinkedIn, Slack, iMessage, email) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://slohani-22.github.io/">
+  <meta property="og:title" content="Sanskar Lohani — IAM &amp; Cloud Security">
+  <meta property="og:description" content="IAM and cloud security labs on AWS and Azure: SAML/OIDC federation, least-privilege IAM, access automation, and Microsoft Sentinel detections. M.S. Cybersecurity (FIU), AZ-500, Security+.">
+  <meta property="og:image" content="https://slohani-22.github.io/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Sanskar Lohani, IAM and Cloud Security. AWS, Azure, AZ-500, Security+, M.S. Cybersecurity.">
+  <meta name="twitter:card" content="summary_large_image">
 
-#matrix-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  opacity: 0.22;
-  pointer-events: none;
-}
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F97362'/%3E%3Ctext x='32' y='42' font-family='monospace' font-size='28' font-weight='700' text-anchor='middle' fill='%23121418'%3ESL%3C/text%3E%3C/svg%3E">
 
-#wrap {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 900px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 
-#hero {
-  text-align: center;
-}
+  <style>
+    /* ---------- Colors (Option 4: charcoal, sky blue, coral) ---------- */
+    :root {
+      --bg-deep: #121418;      /* darkest background */
+      --bg-section: #1A1D22;   /* alternate section background */
+      --bg-panel: #1E2228;     /* panels on dark */
+      --bg-card: #24282F;      /* cards */
+      --border: #3A404A;
+      --text: #FFFFFF;
+      --text-body: #D1D5DB;
+      --text-soft: #C9CED6;
+      --text-muted: #A1A8B3;
+      --sky: #38BDF8;          /* information: labels, numbers, icons */
+      --sky-light: #7DD3FC;
+      --sky-tag: #0C3A52;
+      --coral: #F97362;        /* actions: buttons and key highlights */
+      --coral-hover: #FB8B7D;
+    }
 
-#hero h1 {
-  font-size: 64px;
-  font-weight: 900;
-  color: #00ff88;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  line-height: 1;
-  text-shadow: 0 0 30px rgba(0,255,136,0.3);
-}
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; border-radius: 6px; }
 
-#hero p {
-  color: #444;
-  font-size: 13px;
-  margin-top: 6px;
-  letter-spacing: 2px;
-}
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+    .eyebrow { margin: 0 0 8px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sky); }
+    h1, h2, h3 { margin: 0; letter-spacing: -0.01em; }
+    h2 { font-size: clamp(28px, 4vw, 34px); font-weight: 700; }
+    .section { padding: 72px 0; }
+    .section.alt { background: var(--bg-section); }
 
-#terminal {
-  width: 100%;
-  background: #0d0d0d;
-  border: 1px solid #1e1e1e;
-  border-radius: 10px;
-  overflow: hidden;
-}
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      min-height: 48px; padding: 0 22px; border-radius: 8px;
+      text-decoration: none; font-weight: 500;
+      border: 1px solid var(--border); color: var(--text);
+      transition: transform .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover { border-color: var(--sky); transform: translateY(-2px); }
+    .btn.primary { background: var(--coral); border-color: var(--coral); color: var(--bg-deep); font-weight: 600; }
+    .btn.primary:hover { background: var(--coral-hover); border-color: var(--coral-hover); box-shadow: 0 8px 24px rgba(249,115,98,.25); }
+    .btn.small { min-height: 44px; padding: 0 18px; }
 
-#titlebar {
-  background: #161616;
-  padding: 12px 18px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid #1e1e1e;
-}
+    /* ---------- Header ---------- */
+    .nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 18px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--coral); color: var(--bg-deep); display: inline-flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; }
+    .nav-links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 22px; font-size: 15px; }
+    .nav-links a { color: var(--text-soft); text-decoration: none; padding: 10px 0; transition: color .2s ease; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.resume { color: var(--bg-deep); background: var(--coral); padding: 10px 16px; border-radius: 6px; font-weight: 600; }
+    .nav-links a.resume:hover { background: var(--coral-hover); color: var(--bg-deep); }
 
-.dot { width: 13px; height: 13px; border-radius: 50%; }
-.dot.red { background: #ff5f57; }
-.dot.yellow { background: #febc2e; }
-.dot.green { background: #28c840; }
-#titlebar span { color: #444; font-size: 13px; margin-left: auto; margin-right: auto; letter-spacing: 1px; }
+    /* ---------- Hero ---------- */
+    .hero { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; padding-top: 56px; padding-bottom: 80px; }
+    .hero-main { flex: 1 1 520px; min-width: 0; }
+    .hero h1 { font-size: clamp(42px, 7vw, 60px); line-height: 1.04; font-weight: 700; letter-spacing: -0.02em; }
+    .hero .headline { margin: 14px 0 0; font-size: clamp(22px, 3.4vw, 28px); font-weight: 500; color: var(--sky-light); }
+    .hero .intro { margin: 24px 0 0; max-width: 600px; font-size: 18px; color: var(--text-soft); }
+    .hero .actions { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .glance { flex: 1 1 340px; min-width: 0; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .glance .label { margin: 0 0 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+    .glance dl { margin: 0; display: flex; flex-direction: column; gap: 14px; font-size: 15px; }
+    .glance dt { color: var(--text-muted); font-size: 13px; }
+    .glance dd { margin: 2px 0 0; font-weight: 500; }
 
-#output {
-  padding: 24px;
-  min-height: 420px;
-  max-height: 70vh;
-  overflow-y: auto;
-  font-size: 16px;
-  line-height: 2;
-}
+    /* ---------- Project case studies ---------- */
+    .lead { margin: 10px 0 40px; max-width: 640px; color: var(--text-soft); font-size: 17px; }
+    .case {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+      display: flex; flex-wrap: wrap; margin-bottom: 32px;
+      transition: border-color .25s ease, box-shadow .25s ease;
+    }
+    .case:hover { border-color: #4B5563; box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+    .case.reverse { flex-wrap: wrap-reverse; }
+    .case-body { flex: 1 1 520px; min-width: 0; padding: 36px; display: flex; flex-direction: column; gap: 20px; }
+    .case figure { flex: 1 1 380px; min-width: 0; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; }
+    .case figure.dark { background: #1E1E1E; }
+    .case figure.framed { background: var(--bg-panel); }
+    .case figure.framed img { border: 1px solid var(--border); border-radius: 8px; }
+    .case figure img { width: 100%; max-width: 440px; border-radius: 6px; transition: transform .35s ease; }
+    .case:hover figure img { transform: scale(1.02); }
+    .case figcaption { margin-top: 12px; font-size: 13px; color: var(--text-muted); }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--sky-tag); color: var(--sky-light); font-weight: 500; }
+    .hook { margin: 0; font-size: clamp(20px, 2.6vw, 24px); line-height: 1.3; font-weight: 600; }
+    .case h3 { font-size: 18px; font-weight: 600; color: var(--text-muted); }
+    .steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 16px; }
+    .steps li { display: flex; gap: 14px; }
+    .step-num { flex: 0 0 32px; height: 32px; border-radius: 50%; background: var(--bg-deep); color: var(--sky-light); font-family: 'IBM Plex Mono', monospace; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+    .step-num.found { background: var(--coral); color: var(--bg-deep); font-weight: 600; }
+    .steps p { margin: 0; }
+    .steps .step-title { font-weight: 600; }
+    .steps .step-text { margin-top: 2px; color: var(--text-body); }
+    .case .links { display: flex; flex-wrap: wrap; gap: 12px; }
+    .stack { margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-muted); }
+    .stats { padding-top: 18px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 16px 32px; }
+    .stat-num { margin: 0; font-size: 26px; font-weight: 700; color: var(--sky); line-height: 1; }
+    .stat-num.coral { color: var(--coral); }
+    .stat-label { margin: 4px 0 0; font-size: 13px; color: var(--text-muted); }
 
-#output::-webkit-scrollbar { width: 4px; }
-#output::-webkit-scrollbar-track { background: #0d0d0d; }
-#output::-webkit-scrollbar-thumb { background: #1e1e1e; }
+    .more-title { margin: 0 0 16px; font-size: 20px; font-weight: 600; }
+    .more { display: flex; flex-wrap: wrap; gap: 16px; }
+    .more a {
+      flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 20px;
+      border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border); text-decoration: none;
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    .more a:hover { transform: translateY(-3px); border-color: var(--sky); }
+    .more .name { font-weight: 600; }
+    .more .name small { font-weight: 400; color: var(--text-muted); font-size: inherit; }
+    .more .desc { color: var(--text-soft); font-size: 15px; }
+    .more .lang { margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--sky-light); }
 
-.line { display: block; white-space: pre-wrap; word-break: break-word; }
-.info { color: #aaa; }
-.hdr { color: #00ff88; font-weight: bold; font-size: 17px; }
-.warn { color: #febc2e; }
-.err { color: #ff5f57; }
-.ok { color: #28c840; }
-.dim { color: #333; }
-.cyan { color: #00d4ff; }
-.white { color: #ffffff; }
-.pink { color: #ff6eb4; }
+    /* ---------- Experience ---------- */
+    .grid-2 { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 32px; }
+    .job { flex: 1 1 460px; min-width: 0; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 28px; display: flex; flex-direction: column; gap: 16px; transition: border-color .2s ease; }
+    .job:hover { border-color: #4B5563; }
+    .job-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; }
+    .job-title { margin: 0; font-size: 20px; font-weight: 600; }
+    .job-org { margin: 2px 0 0; color: var(--text-muted); }
+    .job-dates { margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: var(--text-muted); }
+    .job ul { margin: 0; padding-left: 20px; color: var(--text-body); display: flex; flex-direction: column; gap: 6px; }
+    .chips-label { margin: 0 0 8px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 4px 10px; border-radius: 6px; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-body); }
 
-#input-line {
-  display: flex;
-  align-items: center;
-  padding: 14px 24px;
-  border-top: 1px solid #1e1e1e;
-  background: #0d0d0d;
-  gap: 10px;
-}
+    /* ---------- Certifications ---------- */
+    .certs { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 32px; }
+    .cert { flex: 1 1 320px; min-width: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px; transition: transform .2s ease, border-color .2s ease; }
+    .cert:hover { transform: translateY(-3px); border-color: var(--sky); }
+    .cert.edu { background: var(--bg-deep); }
+    .cert.edu:hover { transform: none; border-color: var(--border); }
+    .cert-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .icon-box { width: 48px; height: 48px; border-radius: 12px; background: var(--bg-deep); color: var(--sky); display: inline-flex; align-items: center; justify-content: center; }
+    .cert.edu .icon-box { background: var(--bg-card); color: var(--coral); }
+    .status { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--sky-tag); color: var(--sky-light); }
+    .cert-name { margin: 0; font-weight: 600; font-size: 17px; }
+    .cert-meta { margin: 2px 0 0; color: var(--text-muted); font-size: 14px; }
+    .cert-dates { margin: 0; font-size: 14px; color: var(--text-body); }
+    .verify { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; font-weight: 500; font-size: 14px; transition: border-color .2s ease; }
+    .verify:hover { border-color: var(--sky); }
 
-#prompt-label {
-  color: #00ff88;
-  white-space: nowrap;
-  font-size: 16px;
-  user-select: none;
-}
+    /* ---------- Skills ---------- */
+    .skills { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 32px; }
+    .skill { flex: 1 1 240px; min-width: 0; border-top: 3px solid var(--sky); padding-top: 16px; }
+    .skill:nth-child(odd) { border-top-color: var(--coral); }
+    .skill p { margin: 0; }
+    .skill .skill-name { margin-bottom: 10px; font-weight: 600; }
+    .skill .skill-list { color: var(--text-body); font-size: 15px; }
 
-#cmd-input {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: #ffffff;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 16px;
-  flex: 1;
-  caret-color: #00ff88;
-}
+    /* ---------- Contact band and footer ---------- */
+    .contact { background: var(--bg-panel); border-top: 1px solid var(--border); }
+    .contact .wrap { padding-top: 72px; padding-bottom: 72px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px; }
+    .contact h2 { font-size: clamp(28px, 4vw, 36px); }
+    .contact p { margin: 12px 0 0; color: var(--text-soft); font-size: 18px; }
+    .contact .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    footer { background: #0D0F12; color: var(--text-muted); font-size: 14px; }
+    footer .wrap { padding-top: 20px; padding-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 24px; }
+    footer a { color: var(--text-muted); padding: 10px 0; }
+    footer a:hover { color: var(--text); }
 
-.img-wrap {
-  margin: 12px 0;
-  border-radius: 6px;
-  overflow: hidden;
-  max-width: 100%;
-}
+    /* ---------- Scroll fade-in (only when JavaScript is running) ---------- */
+    .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+    .js .reveal.visible { opacity: 1; transform: none; }
 
-.img-wrap img {
-  width: 100%;
-  max-height: none;
-  object-fit: contain;
-  display: block;
-  border-radius: 6px;
-  border: 1px solid #1e1e1e;
-}
+    /* Respect people who turn off motion in their system settings */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .js .reveal { opacity: 1; transform: none; transition: none; }
+      .btn, .case, .case figure img, .more a, .cert, .job { transition: none; }
+      .btn:hover, .more a:hover, .cert:hover, .case:hover figure img { transform: none; }
+    }
 
-.img-cap {
-  color: #aaa;
-  font-size: 12px;
-  margin-top: 6px;
-  font-style: italic;
-  padding-left: 2px;
-}
-
-.tag {
-  background: #161616;
-  color: #00ff88;
-  padding: 2px 10px;
-  border-radius: 3px;
-  font-size: 13px;
-  margin: 2px;
-  display: inline-block;
-  border: 1px solid #1e1e1e;
-}
-
-.help-row {
-  display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 2px 12px;
-  margin: 2px 0;
-}
-
-.hcmd { color: #00ff88; }
-.hdesc { color: #555; }
-
-a { color: #00d4ff; text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-.sep { color: #1e1e1e; }
-</style>
+    @media (max-width: 600px) {
+      .section { padding: 56px 0; }
+      .case-body { padding: 24px; }
+      .hero { padding-top: 32px; padding-bottom: 56px; }
+    }
+  </style>
 </head>
 <body>
 
-<canvas id="matrix-canvas"></canvas>
-
-<div id="wrap">
-
-  <div id="hero">
-    <h1>Sanskar</h1>
-    <p>cybersecurity engineer &nbsp;·&nbsp; cloud threat hunter &nbsp;·&nbsp; former mountain person</p>
-  </div>
-
-  <div id="terminal">
-    <div id="titlebar">
-      <div class="dot red"></div>
-      <div class="dot yellow"></div>
-      <div class="dot green"></div>
-      <span>sanskar@portfolio ~ bash</span>
+  <header>
+    <div class="wrap">
+      <nav class="nav" aria-label="Main">
+        <a href="#top" class="brand"><span class="brand-mark" aria-hidden="true">SL</span>Sanskar Lohani</a>
+        <div class="nav-links">
+          <a href="#projects">Projects</a>
+          <a href="#experience">Experience</a>
+          <a href="#certifications">Certifications</a>
+          <a href="#contact">Contact</a>
+          <!-- Put your resume in this repo as resume.pdf -->
+          <a href="resume.pdf" class="resume">Resume</a>
+        </div>
+      </nav>
     </div>
-    <div id="output"></div>
-    <div id="input-line">
-      <span id="prompt-label">sanskar@portfolio:~$</span>
-      <input id="cmd-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus />
+  </header>
+
+  <main id="top">
+
+    <!-- ================= HERO ================= -->
+    <section class="wrap hero">
+      <div class="hero-main reveal">
+        <p class="eyebrow" style="margin-bottom:18px">Identity &amp; Access Management · Cloud Security</p>
+        <h1>Sanskar Lohani</h1>
+        <p class="headline">IAM &amp; Cloud Security</p>
+        <p class="intro">I design who gets access to what in AWS and Azure, then test whether those controls actually hold. Three years as a software engineer taught me to build authentication; security taught me to question it.</p>
+        <div class="actions">
+          <a href="resume.pdf" class="btn primary">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            Download resume
+          </a>
+          <a href="#projects" class="btn">See the projects</a>
+          <a href="https://github.com/slohani-22" class="btn">GitHub</a>
+          <a href="https://linkedin.com/in/slohani22" class="btn">LinkedIn</a>
+        </div>
+      </div>
+
+      <aside class="glance reveal" aria-label="Quick facts">
+        <p class="label">At a glance</p>
+        <dl>
+          <div><dt>Looking for</dt><dd>IAM or Cloud Security roles, analyst or engineer</dd></div>
+          <div><dt>Location</dt><dd>Dallas–Fort Worth, TX · open to relocation</dd></div>
+          <div><dt>Education</dt><dd>M.S. Cybersecurity, FIU · GPA 3.97</dd></div>
+          <div><dt>Certifications</dt><dd>AZ-500 · CompTIA Security+</dd></div>
+          <div><dt>Background</dt><dd>3 years software engineering + graduate TA</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <!-- ================= PROJECTS ================= -->
+    <section id="projects" class="section alt">
+      <div class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Projects</p>
+          <h2>What I built, and what it taught me</h2>
+          <p class="lead">Each lab is documented end to end on GitHub, including the parts that didn't work.</p>
+        </div>
+
+        <!-- SecureCorp -->
+        <article class="case reveal">
+          <div class="case-body">
+            <div class="tags"><span class="tag">AWS</span><span class="tag">Identity &amp; access</span></div>
+            <p class="hook">“Six months later I audited my own access system. A grant meant to last 5 minutes was still active.”</p>
+            <h3>SecureCorp AWS IAM Lab</h3>
+            <ol class="steps">
+              <li>
+                <span class="step-num" aria-hidden="true">01</span>
+                <div><p class="step-title">The goal</p><p class="step-text">Run identity for a made-up four-department company: who can sign in, what each team can touch, and how someone gets temporary extra access.</p></div>
+              </li>
+              <li>
+                <span class="step-num" aria-hidden="true">02</span>
+                <div><p class="step-title">What I built</p><p class="step-text">Single sign-on from Entra ID to AWS, keyless GitHub deployments with OIDC, group-based roles with MFA and permission boundaries, and a request-and-approve flow for temporary access, all automated with Lambda.</p></div>
+              </li>
+              <li>
+                <span class="step-num found" aria-hidden="true">03</span>
+                <div><p class="step-title">What I found</p><p class="step-text">The step that removes access never ran. The audit log still said "approved," so everything looked fine. Lesson: check what's actually attached, not what the function reported.</p></div>
+              </li>
+            </ol>
+            <div class="links">
+              <a href="https://github.com/slohani-22/SecureCorp-AWS-IAM-Lab#lessons-learned-post-project-review-october-2026" class="btn primary small">Read what went wrong →</a>
+              <a href="https://github.com/slohani-22/SecureCorp-AWS-IAM-Lab" class="btn small">Repository</a>
+            </div>
+            <p class="stack">AWS IAM · Identity Center · Entra ID · Lambda · DynamoDB · EventBridge · CloudTrail · Python</p>
+            <div class="stats">
+              <div><p class="stat-num" data-count="6">6</p><p class="stat-label">Lambda functions written</p></div>
+              <div><p class="stat-num" data-count="2">2</p><p class="stat-label">sign-in federations (SAML, OIDC)</p></div>
+              <div><p class="stat-num" data-count="6">6</p><p class="stat-label">security alarms on CloudTrail</p></div>
+              <div><p class="stat-num coral" data-count="170">170</p><p class="stat-label">days a 5-min grant stayed live</p></div>
+            </div>
+          </div>
+          <figure class="dark">
+            <img src="assets/securecorp-architecture.png" width="611" height="726" loading="lazy" alt="SecureCorp architecture: identity infrastructure, federation, access controls, automation, monitoring, and the CloudTrail to Sentinel pipeline">
+            <figcaption>Lab architecture</figcaption>
+          </figure>
+        </article>
+
+        <!-- Sentinel -->
+        <article class="case reverse reveal">
+          <figure class="framed">
+            <img src="assets/sentinel-architecture.png" width="1290" height="1090" loading="lazy" alt="Sentinel lab architecture: a Windows VM feeding logs through a data collection rule into Log Analytics and Microsoft Sentinel, with data connectors, flow logs, DNS logs, Azure Firewall, and a response playbook">
+            <figcaption>Lab architecture</figcaption>
+          </figure>
+          <div class="case-body">
+            <div class="tags"><span class="tag">Azure</span><span class="tag">Detection &amp; response</span></div>
+            <p class="hook">“I attacked my own Azure environment in eight stages, then wrote the detections to catch it.”</p>
+            <h3>Microsoft Sentinel SIEM Lab</h3>
+            <ol class="steps">
+              <li>
+                <span class="step-num" aria-hidden="true">01</span>
+                <div><p class="step-title">The goal</p><p class="step-text">Build a working security operations setup on Azure and prove the detections fire on real attack activity, not sample data.</p></div>
+              </li>
+              <li>
+                <span class="step-num" aria-hidden="true">02</span>
+                <div><p class="step-title">What I built</p><p class="step-text">Detection rules mapped to MITRE ATT&amp;CK, written investigations, and a playbook that disables a compromised account automatically through Microsoft Graph.</p></div>
+              </li>
+              <li>
+                <span class="step-num found" aria-hidden="true">03</span>
+                <div><p class="step-title">What I found</p><p class="step-text">Some rules fired on normal admin work and needed tuning. My new-account rule never fired at all, because the attack script ran as SYSTEM, which doesn't log those events the way a real sign-in does.</p></div>
+              </li>
+            </ol>
+            <div class="links">
+              <a href="https://github.com/slohani-22/Microsoft-Sentinel-SIEM-Lab" class="btn primary small">See the detections →</a>
+            </div>
+            <p class="stack">Microsoft Sentinel · KQL · Entra ID · Defender XDR · Logic Apps · Microsoft Graph</p>
+            <div class="stats">
+              <div><p class="stat-num" data-count="16">16</p><p class="stat-label">detection rules written</p></div>
+              <div><p class="stat-num" data-count="8">8</p><p class="stat-label">attack stages simulated</p></div>
+              <div><p class="stat-num" data-count="3">3</p><p class="stat-label">investigations documented</p></div>
+              <div><p class="stat-num" data-count="2">2</p><p class="stat-label">noisy rules analyzed</p></div>
+            </div>
+          </div>
+        </article>
+
+        <h3 class="more-title reveal">More projects</h3>
+        <div class="more reveal">
+          <a href="https://github.com/slohani-22/Network-Cyberattack-Detection">
+            <span class="name">Network Cyberattack Detection</span>
+            <span class="desc">Rules, anomaly scoring, and an LLM layered to classify network traffic.</span>
+            <span class="lang">Python →</span>
+          </a>
+          <a href="https://github.com/slohani-22/Hallucination-Aware-NLP">
+            <span class="name">Hallucination-Aware NLP</span>
+            <span class="desc">Research comparing three ways to stop an LLM from making things up.</span>
+            <span class="lang">Python →</span>
+          </a>
+          <a href="https://github.com/slohani-22/AppointDoc">
+            <span class="name">AppointDoc <small>· team project</small></span>
+            <span class="desc">Doctor booking app with login and separate roles for patients, doctors, and admins.</span>
+            <span class="lang">MERN →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= EXPERIENCE ================= -->
+    <section id="experience" class="section">
+      <div class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Experience</p>
+          <h2>Where I've worked</h2>
+        </div>
+        <div class="grid-2">
+          <article class="job reveal">
+            <div class="job-head">
+              <div>
+                <p class="job-title">Software Engineer</p>
+                <p class="job-org">Staris HR Service · Kathmandu, Nepal</p>
+              </div>
+              <p class="job-dates">2020 – 2023</p>
+            </div>
+            <ul>
+              <li>Built the backends of client web apps: APIs, data models, and the login and permissions layer.</li>
+              <li>Handled the security pieces of each release: user roles, password hashing, and rate-limited logins.</li>
+              <li>Set up least-privilege AWS access for client accounts and sent their activity logs to Sentinel.</li>
+            </ul>
+            <div>
+              <p class="chips-label">Built with</p>
+              <div class="chips">
+                <span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">MongoDB</span><span class="chip">JWT</span>
+                <span class="chip">bcrypt</span><span class="chip">AWS IAM</span><span class="chip">CloudTrail</span><span class="chip">Sentinel</span>
+              </div>
+            </div>
+          </article>
+          <article class="job reveal">
+            <div class="job-head">
+              <div>
+                <p class="job-title">Graduate Teaching Assistant</p>
+                <p class="job-org">Florida International University · Miami, FL</p>
+              </div>
+              <p class="job-dates">2024 – 2026</p>
+            </div>
+            <ul>
+              <li>Reviewed network and systems programming work for 100+ students each semester.</li>
+              <li>Gave feedback on the bugs that turn into vulnerabilities: memory handling and protocol mistakes.</li>
+            </ul>
+            <div>
+              <p class="chips-label">Worked with</p>
+              <div class="chips"><span class="chip">C</span><span class="chip">TCP sockets</span><span class="chip">Linux</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CERTIFICATIONS ================= -->
+    <section id="certifications" class="section alt">
+      <div class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Credentials</p>
+          <h2>Certifications &amp; education</h2>
+        </div>
+        <div class="certs">
+          <article class="cert reveal">
+            <div class="cert-top">
+              <span class="icon-box" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
+              <span class="status">Active</span>
+            </div>
+            <div>
+              <p class="cert-name">CompTIA Security+</p>
+              <p class="cert-meta">CompTIA · SY0-701</p>
+            </div>
+            <p class="cert-dates">Earned Apr 2026 · Valid through Apr 2029</p>
+            <!-- Paste your Credly badge link into href, then delete the word hidden -->
+            <a href="#" class="verify" hidden>Verify on Credly →</a>
+          </article>
+          <article class="cert reveal">
+            <div class="cert-top">
+              <span class="icon-box" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.75 3.75 0 0 1 17.5 18z"/><path d="M10 13l1.5 1.5L14.5 11"/></svg></span>
+              <span class="status">Active</span>
+            </div>
+            <div>
+              <p class="cert-name">Azure Security Engineer Associate</p>
+              <p class="cert-meta">Microsoft · AZ-500</p>
+            </div>
+            <p class="cert-dates">Earned Apr 2026 · Valid through Apr 2027</p>
+            <!-- Paste your Microsoft Learn credential link into href, then delete the word hidden -->
+            <a href="#" class="verify" hidden>Verify on Microsoft Learn →</a>
+          </article>
+          <article class="cert edu reveal">
+            <span class="icon-box" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></svg></span>
+            <div>
+              <p class="cert-name">M.S. Cybersecurity</p>
+              <p class="cert-meta">Florida International University · 2026 · GPA 3.97</p>
+            </div>
+            <div>
+              <p class="cert-name">B.E. Electrical &amp; Electronics Engineering</p>
+              <p class="cert-meta">Kathmandu University · 2023</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SKILLS ================= -->
+    <section class="section" aria-labelledby="skills-h">
+      <div class="wrap">
+        <div class="reveal">
+          <p class="eyebrow">Skills</p>
+          <h2 id="skills-h">What I work with</h2>
+        </div>
+        <div class="skills reveal">
+          <div class="skill"><p class="skill-name">Identity &amp; access</p><p class="skill-list">SAML 2.0 · OIDC · SSO · MFA · RBAC · least-privilege policy · permission boundaries · just-in-time access</p></div>
+          <div class="skill"><p class="skill-name">Cloud</p><p class="skill-list">AWS IAM · IAM Identity Center · Lambda · CloudTrail · GuardDuty · Microsoft Entra ID · Azure</p></div>
+          <div class="skill"><p class="skill-name">Detection</p><p class="skill-list">Microsoft Sentinel · KQL · MITRE ATT&amp;CK · Logic Apps</p></div>
+          <div class="skill"><p class="skill-name">Code &amp; tooling</p><p class="skill-list">Python · PowerShell · JavaScript · Terraform · GitHub Actions · Git · Linux</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+    <section id="contact" class="contact">
+      <div class="wrap reveal">
+        <div style="flex:1 1 480px;min-width:0">
+          <h2>Hiring for IAM or cloud security?</h2>
+          <p>I'm in Dallas–Fort Worth and open to relocating anywhere in the US.</p>
+        </div>
+        <div class="actions">
+          <a href="resume.pdf" class="btn primary">Download resume</a>
+          <a href="mailto:sloha002@gmail.com" class="btn">sloha002@gmail.com</a>
+          <a href="https://linkedin.com/in/slohani22" class="btn">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© 2026 Sanskar Lohani</span>
+      <a href="terminal.html">Prefer a terminal? Try terminal mode →</a>
     </div>
-  </div>
+  </footer>
 
-</div>
+  <script>
+    // Turn on the fade-in styles only when JavaScript runs, so the page still shows everything without it.
+    document.documentElement.classList.add('js');
 
-<script>
-const PHOTOS = {
-  annapurna: "photos/annapurna.jpeg",
-  abc: "photos/abc.jpeg",
-  forest: "photos/forest.jpeg",
-  mist: "photos/mist.jpeg",
-  ride: "photos/ride.jpeg",
-  sunset: "photos/sunset.jpeg"
-};
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const out = document.getElementById('output');
-const input = document.getElementById('cmd-input');
-let cmdHistory = [];
-let histIdx = -1;
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function addLine(html, cls) {
-  const el = document.createElement('span');
-  el.className = 'line ' + (cls || 'info');
-  el.innerHTML = html;
-  out.appendChild(el);
-  out.appendChild(document.createElement('br'));
-  out.scrollTop = out.scrollHeight;
-}
-
-function addBlank() {
-  out.appendChild(document.createElement('br'));
-}
-
-function addImg(key, caption) {
-  const wrap = document.createElement('div');
-  wrap.className = 'img-wrap';
-  const img = document.createElement('img');
-  img.src = PHOTOS[key];
-  img.alt = caption;
-  const cap = document.createElement('div');
-  cap.className = 'img-cap';
-  cap.textContent = caption;
-  wrap.appendChild(img);
-  wrap.appendChild(cap);
-  out.appendChild(wrap);
-  out.scrollTop = out.scrollHeight;
-}
-
-async function typeText(text, cls, delay) {
-  delay = delay || 16;
-  const el = document.createElement('span');
-  el.className = 'line ' + (cls || 'info');
-  out.appendChild(el);
-  out.appendChild(document.createElement('br'));
-  for (let i = 0; i < text.length; i++) {
-    el.textContent += text[i];
-    out.scrollTop = out.scrollHeight;
-    await sleep(delay);
-  }
-}
-
-async function boot() {
-  await sleep(200);
-  await typeText('Booting system...', 'dim', 25);
-  await sleep(150);
-  await typeText('Loading threat intel... [OK]', 'dim', 18);
-  await sleep(100);
-  await typeText('Mounting KQL engine... [OK]', 'dim', 18);
-  await sleep(100);
-  await typeText('Establishing secure shell... [OK]', 'dim', 18);
-  await sleep(300);
-  addBlank();
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-  addBlank();
-  await typeText('  MS Cybersecurity · FIU \'26  |  AZ-500 · Security+', 'cyan', 14);
-  await typeText('  SOC · Cloud Security · IAM · Detection Engineering', 'cyan', 14);
-  addBlank();
-  addLine('  <span class="tag">Microsoft Sentinel</span> <span class="tag">KQL</span> <span class="tag">Azure</span> <span class="tag">Entra ID</span> <span class="tag">Logic Apps</span>', 'line');
-  addBlank();
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-  addBlank();
-  await typeText('  Type a command. Start with \'help\' if you\'re new here.', 'info', 14);
-  addBlank();
-}
-
-function showHelp() {
-  addBlank();
-  addLine('available commands', 'hdr');
-  addBlank();
-
-  const cmds = [
-    ['whoami', 'who is this person'],
-    ['skills', 'technical arsenal'],
-    ['projects', 'things built'],
-    ['certs', 'credentials earned'],
-    ['contact', 'find me'],
-    ['─────────', '─────────────────────'],
-    ['annapurna', 'easter egg #1'],
-    ['abc', 'easter egg #2'],
-    ['forest', 'easter egg #3'],
-    ['mist', 'easter egg #4'],
-    ['ride', 'easter egg #5'],
-    ['sunset', 'easter egg #6'],
-    ['─────────', '─────────────────────'],
-    ['clear', 'clean the slate'],
-    ['help', 'show this menu'],
-  ];
-
-  cmds.forEach(function(pair) {
-    const row = document.createElement('div');
-    row.className = 'help-row';
-    const c = document.createElement('span');
-    c.className = pair[0].startsWith('─') ? 'hdesc' : 'hcmd';
-    c.textContent = pair[0];
-    const d = document.createElement('span');
-    d.className = 'hdesc';
-    d.textContent = pair[0].startsWith('─') ? '' : '— ' + pair[1];
-    row.appendChild(c);
-    row.appendChild(d);
-    out.appendChild(row);
-  });
-  addBlank();
-  out.scrollTop = out.scrollHeight;
-}
-
-function showWhoami() {
-  addBlank();
-  addLine('sanskar lohani', 'hdr');
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-  addBlank();
-  addLine('Originally from Nepal. Grew up trekking mountains,', 'info');
-  addLine('riding motorcycles on roads that probably shouldn\'t exist.', 'info');
-  addLine('Somewhere along the way, ended up in Miami', 'info');
-  addLine('chasing zero-days instead of summits.', 'info');
-  addBlank();
-  addLine('Cybersecurity is its own kind of wilderness —', 'cyan');
-  addLine('constantly changing terrain, no map, something', 'cyan');
-  addLine('always trying to find a way in. I\'m good at that.', 'cyan');
-  addBlank();
-  addLine('MS Cybersecurity @ Florida International University', 'info');
-  addLine('GPA: 3.96  |  Graduating: April 2026', 'info');
-  addLine('BS Electrical & Electronics @ Kathmandu University', 'info');
-  addBlank();
-  addLine('Targeting: SOC Analyst  |  Cloud Security  |  IAM Analyst  |  Security Engineer', 'warn');
-  addBlank();
-}
-
-// CHANGE 1 — Skills section updated with AWS tools
-function showSkills() {
-  addBlank();
-  addLine('technical stack', 'hdr');
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-  addBlank();
-  addLine('SIEM & Detection', 'cyan');
-  addLine('  Microsoft Sentinel   KQL   Splunk   MITRE ATT&CK   Defender XDR', 'info');
-  addBlank();
-  addLine('Identity & Access Management', 'cyan');
-  addLine('  Entra ID   Azure RBAC   Conditional Access   PIM', 'info');
-  addLine('  AWS IAM   IAM Identity Center   SAML 2.0   OIDC', 'info');
-  addLine('  Permission Boundaries   SCPs   JIT Access', 'info');
-  addBlank();
-  addLine('Cloud Security', 'cyan');
-  addLine('  Azure   Defender for Cloud   Logic Apps   Azure Monitor   AMA', 'info');
-  addLine('  AWS CloudTrail   CloudWatch   GuardDuty   Security Hub', 'info');
-  addLine('  Secrets Manager   Lambda   EventBridge   AWS Organizations', 'info');
-  addBlank();
-  addLine('Infrastructure as Code & CI/CD', 'cyan');
-  addLine('  Terraform   GitHub Actions   AWS STS   Session Manager', 'info');
-  addBlank();
-  addLine('Offensive Tools', 'cyan');
-  addLine('  Nmap   Metasploit   Burp Suite   Nessus   Wireshark   John the Ripper', 'info');
-  addBlank();
-  addLine('Frameworks', 'cyan');
-  addLine('  NIST CSF   NIST 800-53   HIPAA   PCI-DSS   SOX   OWASP Top 10', 'info');
-  addBlank();
-  addLine('Languages', 'cyan');
-  addLine('  Python   C   JavaScript   MATLAB   PowerShell   KQL', 'info');
-  addBlank();
-  addLine('ML & Research', 'cyan');
-  addLine('  PyTorch   Hugging Face   Scikit-learn   GPT-2   RoBERTa', 'info');
-  addBlank();
-}
-
-// CHANGE 2 — Projects section with AWS IAM Lab added first
-function showProjects() {
-  addBlank();
-  addLine('projects', 'hdr');
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-  addBlank();
-
-  var projects = [
-    {
-      name: 'SecureCorp AWS IAM Security Lab',
-      desc: 'Enterprise IAM environment on AWS. Least-privilege RBAC, permission boundaries, SCPs, SAML federation with Entra ID, OIDC for GitHub Actions, JIT access automation with DynamoDB state tracking, CloudTrail detection rules mapped to MITRE ATT&CK, and cross-cloud monitoring via Microsoft Sentinel.',
-      tags: ['AWS IAM', 'Lambda', 'CloudTrail', 'GuardDuty', 'Terraform', 'Sentinel', 'SAML', 'OIDC'],
-      url: 'https://github.com/slohani-22/SecureCorp-AWS-IAM-Lab'
-    },
-    {
-      name: 'Microsoft Sentinel SIEM Lab',
-      desc: 'Production-grade cloud SOC on Azure. 16 custom KQL rules, 8-stage MITRE ATT&CK kill chain simulation, 3 incident investigations, SOAR playbook with Graph API automation, VNet flow logs, DNS logging, and Azure Firewall integration.',
-      tags: ['Azure', 'Sentinel', 'KQL', 'Logic Apps', 'SOAR', 'MITRE ATT&CK'],
-      url: 'https://github.com/slohani-22/Microsoft-Sentinel-SIEM-Lab'
-    },
-    {
-      name: 'Network Cyberattack Detection',
-      desc: 'Hybrid detection pipeline — rule-based, anomaly, and LLM. Fixed a code injection vulnerability discovered during development.',
-      tags: ['Python', 'GPT-3.5', 'ML'],
-      url: 'https://github.com/slohani-22/Network-Cyberattack-Detection'
-    },
-    {
-      name: 'Hallucination-Aware NLP',
-      desc: 'Reduced LLM hallucination from 89.5% to 61.5% without retraining. IEEE-format research report published.',
-      tags: ['GPT-2', 'RoBERTa', 'HotpotQA'],
-      url: 'https://github.com/slohani-22/Hallucination-Aware-NLP'
-    },
-    {
-      name: 'AppointDoc',
-      desc: 'HIPAA-aligned healthcare booking platform with 5 distinct security layers — JWT auth, rate limiting, input sanitization.',
-      tags: ['MERN', 'Node.js', 'MongoDB', 'HIPAA'],
-      url: 'https://github.com/slohani-22/AppointDoc'
-    },
-    {
-      name: 'Arrhythmia Detection BiLSTM',
-      desc: 'ECG arrhythmia classifier. MATLAB original reimplemented as PyTorch BiLSTM on PhysioNet dataset.',
-      tags: ['MATLAB', 'PyTorch', 'PhysioNet'],
-      url: 'https://github.com/slohani-22/Arrhythmia-Detection-BiLSTM'
+    // Count a number up from 0 when its project card comes into view.
+    function countUp(el) {
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      if (reduceMotion || isNaN(target)) { el.textContent = target; return; }
+      var start = null, duration = 900;
+      function step(time) {
+        if (start === null) start = time;
+        var progress = Math.min((time - start) / duration, 1);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - progress, 3)));
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     }
-  ];
 
-  projects.forEach(function(p) {
-    addLine('<a href="' + p.url + '" target="_blank">→ ' + p.name + '</a>', 'line');
-    addLine('  ' + p.desc, 'info');
-    var tagHtml = p.tags.map(function(t) { return '<span class="tag">' + t + '</span>'; }).join(' ');
-    addLine('  ' + tagHtml, 'line');
-    addBlank();
-  });
-}
-
-function showCerts() {
-  addBlank();
-  addLine('certifications', 'hdr');
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-  addBlank();
-  addLine('[✓] CompTIA Security+ SY0-701', 'ok');
-  addLine('    Score: 870  |  Passed: April 2026', 'info');
-  addBlank();
-  addLine('[✓] AZ-500: Microsoft Azure Security Engineer Associate', 'ok');
-  addLine('    Passed: April 2026', 'info');
-  addBlank();
-  addLine('[✓] Quantum Computing Engineer', 'ok');
-  addLine('    Japan Quantum Computing Association (JQCA)', 'info');
-  addBlank();
-}
-
-// CHANGE 3 — Contact line updated
-function showContact() {
-  addBlank();
-  addLine('contact', 'hdr');
-  addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-  addBlank();
-  addLine('Email      <a href="mailto:sloha002@gmail.com">sloha002@gmail.com</a>', 'info');
-  addLine('LinkedIn   <a href="https://linkedin.com/in/slohani22" target="_blank">linkedin.com/in/slohani22</a>', 'info');
-  addLine('GitHub     <a href="https://github.com/slohani-22" target="_blank">github.com/slohani-22</a>', 'info');
-  addBlank();
-  addLine('Open to full-time opportunities in cloud security, SOC analysis, IAM, and cybersecurity risk.', 'warn');
-  addBlank();
-}
-
-var eggs = {
-  annapurna: {
-    lines: ['Annapurna, Nepal.', 'The mountain doesn\'t care about your deadlines.', 'Everything makes sense up there.'],
-    caption: '4,130m. No signal. Best decision.'
-  },
-  abc: {
-    lines: ['Prayer flags at Annapurna Base Camp.', 'Wind carries the prayers. Also your warmth.', '13 days in. Zero regrets.'],
-    caption: 'Annapurna Base Camp. Worth every step.'
-  },
-  forest: {
-    lines: ['Stone path somewhere in the hills.', 'Helmet in hand. No particular destination.', 'This version of me still exists. Just... elsewhere.'],
-    caption: 'Before the deadlines. After the dal bhat.'
-  },
-  mist: {
-    lines: ['Standing on a hill at dusk.', 'No wifi. No notifications.', 'Just thinking.'],
-    caption: 'Still up there somewhere.'
-  },
-  ride: {
-    lines: ['Royal Enfield Classic 350.', 'High mountain pass. Zero visibility.', 'Helmet off because you earned it.', 'Some roads are worth the altitude sickness.'],
-    caption: 'Royal Enfield. Mountains. No plan. Perfect.'
-  },
-  sunset: {
-    lines: ['Not every view needs a mountain.', 'Sometimes the sky does all the work.'],
-    caption: 'Some skies are just different.'
-  }
-};
-
-// CHANGE 4 — secrets unchanged, all easter eggs untouched
-var secrets = {
-  'sudo': function() {
-    addLine('Permission denied.', 'err');
-    addLine('(Nice try. Nobody gets root here.)', 'dim');
-  },
-  'hack': function() {
-    addLine('Scanning target...', 'warn');
-    setTimeout(function() { addLine('You\'ve been in this portfolio for a while now.', 'warn'); }, 600);
-    setTimeout(function() { addLine('Browser: yours. Location: yes. Coffee today: not enough.', 'warn'); }, 1200);
-    setTimeout(function() { addLine('Consider yourself compromised. In a friendly way.', 'ok'); }, 1800);
-  },
-  'rm -rf /': function() {
-    addLine('CRITICAL: Deleting everything...', 'err');
-    setTimeout(function() { addLine('Just kidding. I\'m not falling for that.', 'ok'); }, 900);
-    setTimeout(function() { addLine('(Classic move though.)', 'dim'); }, 1400);
-  },
-  'nepal': function() {
-    addLine('Nepal.', 'cyan');
-    addLine('Himalayas. Rhododendron forests. Dal bhat power.', 'info');
-    addLine('Kathmandu chaos. Mountain silence.', 'info');
-    addLine('The kind of place that gets into your DNA.', 'info');
-    addLine('Haven\'t left it, even though I left it.', 'dim');
-  },
-  'ls -la': function() {
-    addLine('total 48', 'dim');
-    addLine('drwxr-xr-x  skills/', 'info');
-    addLine('drwxr-xr-x  projects/', 'info');
-    addLine('-rw-r--r--  .ambitions        [classified]', 'warn');
-    addLine('-rw-r--r--  .regrets          [empty]', 'ok');
-    addLine('-rw-r--r--  .dal_bhat_recipes [priceless]', 'cyan');
-    addLine('-rw-r--r--  .mountain_memories [uncompressed]', 'cyan');
-  },
-  'zero-day': function() {
-    addLine('CVE-2026-SANSKAR', 'err');
-    addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
-    addLine('CVSS Score: 10.0 — CRITICAL', 'err');
-    addLine('Description: Critical vulnerability in the human tendency', 'warn');
-    addLine('to underestimate entry-level candidates.', 'warn');
-    addLine('Affects: Most hiring managers.', 'warn');
-    addLine('Patch available: No.', 'dim');
-    addLine('Workaround: Schedule an interview.', 'ok');
-  },
-  'coffee': function() {
-    addLine('Brewing... ████████░░ 80%', 'warn');
-    setTimeout(function() { addLine('Error: caffeine dependency not found in cloud environment.', 'err'); }, 900);
-    setTimeout(function() { addLine('Falling back to KQL queries and determination.', 'dim'); }, 1500);
-  },
-  'help --secret': function() {
-    addLine('Secret commands:', 'hdr');
-    addLine('  sudo          try your luck', 'dim');
-    addLine('  hack          you already are', 'dim');
-    addLine('  rm -rf /      classic', 'dim');
-    addLine('  nepal         where it started', 'dim');
-    addLine('  ls -la        hidden files', 'dim');
-    addLine('  zero-day      CVE-2026-SANSKAR', 'dim');
-    addLine('  coffee        brewing failed', 'dim');
-  }
-};
-
-function processCmd(raw) {
-  var cmd = raw.trim().toLowerCase();
-  if (!cmd) return;
-
-  addLine('<span class="highlight">sanskar@portfolio:~$</span> <span class="white">' + raw.replace(/</g, '&lt;') + '</span>', 'line');
-
-  if (cmd === 'clear') { out.innerHTML = ''; return; }
-  if (cmd === 'help') { showHelp(); return; }
-  if (cmd === 'whoami') { showWhoami(); return; }
-  if (cmd === 'skills') { showSkills(); return; }
-  if (cmd === 'projects') { showProjects(); return; }
-  if (cmd === 'certs') { showCerts(); return; }
-  if (cmd === 'contact') { showContact(); return; }
-
-  if (eggs[cmd]) {
-    addBlank();
-    eggs[cmd].lines.forEach(function(t) { addLine(t, 'cyan'); });
-    addBlank();
-    addImg(cmd, eggs[cmd].caption);
-    addBlank();
-    return;
-  }
-
-  if (secrets[cmd]) {
-    addBlank();
-    secrets[cmd]();
-    addBlank();
-    return;
-  }
-
-  addLine('command not found: ' + cmd + '   try \'help\'', 'err');
-}
-
-input.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    var val = input.value;
-    if (val.trim()) cmdHistory.unshift(val);
-    histIdx = -1;
-    input.value = '';
-    processCmd(val);
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    if (histIdx < cmdHistory.length - 1) {
-      histIdx++;
-      input.value = cmdHistory[histIdx];
-    }
-  } else if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    if (histIdx > 0) {
-      histIdx--;
-      input.value = cmdHistory[histIdx];
+    var items = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('visible');
+          entry.target.querySelectorAll('[data-count]').forEach(countUp);
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.12 });
+      items.forEach(function (el) { observer.observe(el); });
     } else {
-      histIdx = -1;
-      input.value = '';
+      items.forEach(function (el) { el.classList.add('visible'); });
     }
-  }
-});
-
-document.addEventListener('click', function() { input.focus(); });
-
-// Matrix rain
-var canvas = document.getElementById('matrix-canvas');
-var ctx = canvas.getContext('2d');
-var cols, drops;
-
-function initMatrix() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  cols = Math.floor(canvas.width / 20);
-  drops = [];
-  for (var i = 0; i < cols; i++) drops[i] = Math.random() * -100;
-}
-
-function drawMatrix() {
-  ctx.fillStyle = 'rgba(10,10,10,0.04)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#00ff66';
-  ctx.font = '14px Courier New';
-  var chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
-  for (var i = 0; i < drops.length; i++) {
-    var ch = chars[Math.floor(Math.random() * chars.length)];
-    ctx.fillText(ch, i * 20, drops[i] * 20);
-    if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-    drops[i]++;
-  }
-}
-
-initMatrix();
-setInterval(drawMatrix, 50);
-window.addEventListener('resize', initMatrix);
-
-boot();
-</script>
+  </script>
 </body>
 </html>
