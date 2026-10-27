@@ -117,8 +117,7 @@
     .case figure.dark { background: #1E1E1E; }
     .case figure.framed { background: var(--bg-panel); }
     .case figure.framed img { border: 1px solid var(--border); border-radius: 8px; }
-    .case figure img { width: 100%; max-width: 440px; border-radius: 6px; transition: transform .35s ease; }
-    .case:hover figure img { transform: scale(1.02); }
+    .case figure img { width: 100%; max-width: 440px; border-radius: 6px; }
     .case figcaption { margin-top: 12px; font-size: 13px; color: var(--text-muted); }
     .tags { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag { font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--sky-tag); color: var(--sky-light); font-weight: 500; }
@@ -199,16 +198,69 @@
     footer a { color: var(--text-muted); padding: 10px 0; }
     footer a:hover { color: var(--text); }
 
-    /* ---------- Scroll fade-in (only when JavaScript is running) ---------- */
-    .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-    .js .reveal.visible { opacity: 1; transform: none; }
+    /* ---------- Tech stack chips ---------- */
+    .stack-chips { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+    .stack-chips li {
+      font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500;
+      padding: 5px 11px; border-radius: 6px;
+      background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.35); color: var(--sky-light);
+    }
+
+    /* ---------- Motion ----------
+       Everything below only switches on when JavaScript runs (the "js" class),
+       so the page still shows all content without it. */
+    :root { --ease: cubic-bezier(.16, 1, .3, 1); }   /* fast start, long soft landing */
+
+    /* Whole blocks: rise, sharpen from a slight blur, and fade in */
+    .js .reveal {
+      opacity: 0; transform: translateY(48px) scale(.98); filter: blur(6px);
+      transition: opacity .9s var(--ease), transform .9s var(--ease), filter .9s var(--ease), box-shadow .35s ease, border-color .35s ease;
+    }
+    .js .reveal.visible { opacity: 1; transform: none; filter: none; }
+
+    /* Groups: each child arrives a moment after the one before (delay set in the script) */
+    .js .stagger > * {
+      opacity: 0; transform: translateY(28px); filter: blur(4px);
+      transition: opacity .8s var(--ease), transform .8s var(--ease), filter .8s var(--ease), border-color .25s ease, box-shadow .3s ease;
+    }
+    .js .stagger.visible > * { opacity: 1; transform: none; filter: none; }
+
+    /* Diagrams drift slightly slower than the page (parallax) and zoom a touch on hover */
+    [data-parallax] { transform: translateY(var(--py, 0px)) scale(var(--zoom, 1)); transition: transform .5s var(--ease); will-change: transform; }
+    .case:hover [data-parallax] { --zoom: 1.03; }
+
+    /* ---------- Floating cards on hover ----------
+       (written with .js and .visible so these win over the reveal rules above) */
+    .case:hover, .js .case.reveal.visible:hover {
+      transform: translateY(-8px);
+      border-color: rgba(56, 189, 248, .45);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, .5), 0 0 0 1px rgba(56, 189, 248, .12);
+      transition: transform .4s var(--ease), box-shadow .4s ease, border-color .4s ease;
+    }
+    .job:hover, .js .job.reveal.visible:hover {
+      transform: translateY(-6px);
+      border-color: rgba(56, 189, 248, .45);
+      box-shadow: 0 22px 48px rgba(0, 0, 0, .45);
+      transition: transform .4s var(--ease), box-shadow .4s ease, border-color .4s ease;
+    }
+    .cert:hover, .js .certs.visible > .cert:hover,
+    .more a:hover, .js .more.visible > a:hover {
+      transform: translateY(-6px);
+      border-color: var(--sky);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+      transition: transform .35s var(--ease), box-shadow .35s ease, border-color .35s ease;
+    }
+    .cert.edu:hover, .js .certs.visible > .cert.edu:hover { border-color: var(--border); }
+    .glance:hover { border-color: rgba(56, 189, 248, .45); }
 
     /* Respect people who turn off motion in their system settings */
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .js .reveal { opacity: 1; transform: none; transition: none; }
-      .btn, .case, .case figure img, .more a, .cert, .job { transition: none; }
-      .btn:hover, .more a:hover, .cert:hover, .case:hover figure img { transform: none; }
+      .js .reveal, .js .stagger > * { opacity: 1; transform: none; filter: none; transition: none; }
+      [data-parallax] { transform: none; transition: none; }
+      .btn, .case, .more a, .cert, .job { transition: none; }
+      .btn:hover, .case:hover, .js .case.reveal.visible:hover, .job:hover, .js .job.reveal.visible:hover,
+      .cert:hover, .js .certs.visible > .cert:hover, .more a:hover, .js .more.visible > a:hover { transform: none; }
     }
 
     @media (max-width: 600px) {
@@ -240,7 +292,7 @@
 
     <!-- ================= HERO ================= -->
     <section class="wrap hero">
-      <div class="hero-main reveal">
+      <div class="hero-main stagger">
         <p class="eyebrow" style="margin-bottom:18px">Identity &amp; Access Management · Cloud Security</p>
         <h1>Sanskar Lohani</h1>
         <p class="headline">IAM &amp; Cloud Security</p>
@@ -258,12 +310,12 @@
 
       <aside class="glance reveal" aria-label="Quick facts">
         <p class="label">At a glance</p>
-        <dl>
-          <div><dt>Looking for</dt><dd>IAM or Cloud Security roles, analyst or engineer</dd></div>
+        <dl class="stagger">
+          <div><dt>Looking for</dt><dd>IAM &amp; Cloud Security roles</dd></div>
           <div><dt>Location</dt><dd>Dallas–Fort Worth, TX · open to relocation</dd></div>
           <div><dt>Education</dt><dd>M.S. Cybersecurity, FIU · GPA 3.97</dd></div>
           <div><dt>Certifications</dt><dd>AZ-500 · CompTIA Security+</dd></div>
-          <div><dt>Background</dt><dd>3 years software engineering + graduate TA</dd></div>
+          <div><dt>Background</dt><dd>3 yrs software engineering · IAM labs on AWS &amp; Entra ID · graduate TA</dd></div>
         </dl>
       </aside>
     </section>
@@ -283,7 +335,7 @@
             <div class="tags"><span class="tag">AWS</span><span class="tag">Identity &amp; access</span></div>
             <p class="hook">“Six months later I audited my own access system. A grant meant to last 5 minutes was still active.”</p>
             <h3>SecureCorp AWS IAM Lab</h3>
-            <ol class="steps">
+            <ol class="steps stagger">
               <li>
                 <span class="step-num" aria-hidden="true">01</span>
                 <div><p class="step-title">The goal</p><p class="step-text">Run identity for a made-up four-department company: who can sign in, what each team can touch, and how someone gets temporary extra access.</p></div>
@@ -301,8 +353,11 @@
               <a href="https://github.com/slohani-22/SecureCorp-AWS-IAM-Lab#lessons-learned-post-project-review-october-2026" class="btn primary small">Read what went wrong →</a>
               <a href="https://github.com/slohani-22/SecureCorp-AWS-IAM-Lab" class="btn small">Repository</a>
             </div>
-            <p class="stack">AWS IAM · Identity Center · Entra ID · Lambda · DynamoDB · EventBridge · CloudTrail · Python</p>
-            <div class="stats">
+            <div>
+              <p class="chips-label">Tech stack</p>
+              <ul class="stack-chips stagger"><li>AWS IAM</li><li>Identity Center</li><li>Entra ID</li><li>Lambda</li><li>DynamoDB</li><li>EventBridge</li><li>CloudTrail</li><li>Python</li></ul>
+            </div>
+            <div class="stats stagger">
               <div><p class="stat-num" data-count="6">6</p><p class="stat-label">Lambda functions written</p></div>
               <div><p class="stat-num" data-count="2">2</p><p class="stat-label">sign-in federations (SAML, OIDC)</p></div>
               <div><p class="stat-num" data-count="6">6</p><p class="stat-label">security alarms on CloudTrail</p></div>
@@ -310,7 +365,7 @@
             </div>
           </div>
           <figure class="dark">
-            <img src="assets/securecorp-architecture.png" width="611" height="726" loading="lazy" alt="SecureCorp architecture: identity infrastructure, federation, access controls, automation, monitoring, and the CloudTrail to Sentinel pipeline">
+            <img data-parallax src="assets/securecorp-architecture.png" width="611" height="726" loading="lazy" alt="SecureCorp architecture: identity infrastructure, federation, access controls, automation, monitoring, and the CloudTrail to Sentinel pipeline">
             <figcaption>Lab architecture</figcaption>
           </figure>
         </article>
@@ -318,14 +373,14 @@
         <!-- Sentinel -->
         <article class="case reverse reveal">
           <figure class="framed">
-            <img src="assets/sentinel-architecture.png" width="1290" height="1090" loading="lazy" alt="Sentinel lab architecture: a Windows VM feeding logs through a data collection rule into Log Analytics and Microsoft Sentinel, with data connectors, flow logs, DNS logs, Azure Firewall, and a response playbook">
+            <img data-parallax src="assets/sentinel-architecture.png" width="1290" height="1090" loading="lazy" alt="Sentinel lab architecture: a Windows VM feeding logs through a data collection rule into Log Analytics and Microsoft Sentinel, with data connectors, flow logs, DNS logs, Azure Firewall, and a response playbook">
             <figcaption>Lab architecture</figcaption>
           </figure>
           <div class="case-body">
             <div class="tags"><span class="tag">Azure</span><span class="tag">Detection &amp; response</span></div>
             <p class="hook">“I attacked my own Azure environment in eight stages, then wrote the detections to catch it.”</p>
             <h3>Microsoft Sentinel SIEM Lab</h3>
-            <ol class="steps">
+            <ol class="steps stagger">
               <li>
                 <span class="step-num" aria-hidden="true">01</span>
                 <div><p class="step-title">The goal</p><p class="step-text">Build a working security operations setup on Azure and prove the detections fire on real attack activity, not sample data.</p></div>
@@ -342,8 +397,11 @@
             <div class="links">
               <a href="https://github.com/slohani-22/Microsoft-Sentinel-SIEM-Lab" class="btn primary small">See the detections →</a>
             </div>
-            <p class="stack">Microsoft Sentinel · KQL · Entra ID · Defender XDR · Logic Apps · Microsoft Graph</p>
-            <div class="stats">
+            <div>
+              <p class="chips-label">Tech stack</p>
+              <ul class="stack-chips stagger"><li>Microsoft Sentinel</li><li>KQL</li><li>Entra ID</li><li>Defender XDR</li><li>Logic Apps</li><li>Microsoft Graph</li></ul>
+            </div>
+            <div class="stats stagger">
               <div><p class="stat-num" data-count="16">16</p><p class="stat-label">detection rules written</p></div>
               <div><p class="stat-num" data-count="8">8</p><p class="stat-label">attack stages simulated</p></div>
               <div><p class="stat-num" data-count="3">3</p><p class="stat-label">investigations documented</p></div>
@@ -353,7 +411,7 @@
         </article>
 
         <h3 class="more-title reveal">More projects</h3>
-        <div class="more reveal">
+        <div class="more stagger">
           <a href="https://github.com/slohani-22/Network-Cyberattack-Detection">
             <span class="name">Network Cyberattack Detection</span>
             <span class="desc">Rules, anomaly scoring, and an LLM layered to classify network traffic.</span>
@@ -396,10 +454,7 @@
             </ul>
             <div>
               <p class="chips-label">Built with</p>
-              <div class="chips">
-                <span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">MongoDB</span><span class="chip">JWT</span>
-                <span class="chip">bcrypt</span><span class="chip">AWS IAM</span><span class="chip">CloudTrail</span><span class="chip">Sentinel</span>
-              </div>
+              <ul class="stack-chips stagger"><li>Node.js</li><li>Express</li><li>MongoDB</li><li>JWT</li><li>bcrypt</li><li>AWS IAM</li><li>CloudTrail</li><li>Sentinel</li></ul>
             </div>
           </article>
           <article class="job reveal">
@@ -416,7 +471,7 @@
             </ul>
             <div>
               <p class="chips-label">Worked with</p>
-              <div class="chips"><span class="chip">C</span><span class="chip">TCP sockets</span><span class="chip">Linux</span></div>
+              <ul class="stack-chips stagger"><li>C</li><li>TCP sockets</li><li>Linux</li></ul>
             </div>
           </article>
         </div>
@@ -430,8 +485,8 @@
           <p class="eyebrow">Credentials</p>
           <h2>Certifications &amp; education</h2>
         </div>
-        <div class="certs">
-          <article class="cert reveal">
+        <div class="certs stagger">
+          <article class="cert">
             <div class="cert-top">
               <span class="icon-box" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></span>
               <span class="status">Active</span>
@@ -444,7 +499,7 @@
             <!-- Paste your Credly badge link into href, then delete the word hidden -->
             <a href="#" class="verify" hidden>Verify on Credly →</a>
           </article>
-          <article class="cert reveal">
+          <article class="cert">
             <div class="cert-top">
               <span class="icon-box" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.5-9 6 6 0 0 1 11.5 1.5A3.75 3.75 0 0 1 17.5 18z"/><path d="M10 13l1.5 1.5L14.5 11"/></svg></span>
               <span class="status">Active</span>
@@ -457,7 +512,7 @@
             <!-- Paste your Microsoft Learn credential link into href, then delete the word hidden -->
             <a href="#" class="verify" hidden>Verify on Microsoft Learn →</a>
           </article>
-          <article class="cert edu reveal">
+          <article class="cert edu">
             <span class="icon-box" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></svg></span>
             <div>
               <p class="cert-name">M.S. Cybersecurity</p>
@@ -479,7 +534,7 @@
           <p class="eyebrow">Skills</p>
           <h2 id="skills-h">What I work with</h2>
         </div>
-        <div class="skills reveal">
+        <div class="skills stagger">
           <div class="skill"><p class="skill-name">Identity &amp; access</p><p class="skill-list">SAML 2.0 · OIDC · SSO · MFA · RBAC · least-privilege policy · permission boundaries · just-in-time access</p></div>
           <div class="skill"><p class="skill-name">Cloud</p><p class="skill-list">AWS IAM · IAM Identity Center · Lambda · CloudTrail · GuardDuty · Microsoft Entra ID · Azure</p></div>
           <div class="skill"><p class="skill-name">Detection</p><p class="skill-list">Microsoft Sentinel · KQL · MITRE ATT&amp;CK · Logic Apps</p></div>
@@ -531,19 +586,53 @@
       requestAnimationFrame(step);
     }
 
-    var items = document.querySelectorAll('.reveal');
+    // Give each child of a .stagger group a slightly later start, so they arrive one after another.
+    document.querySelectorAll('.stagger').forEach(function (group) {
+      Array.prototype.forEach.call(group.children, function (child, i) {
+        child.style.transitionDelay = (i * 90) + 'ms';
+        // Once the entrance is done, remove the delay so hover effects respond instantly.
+        child.addEventListener('transitionend', function clear(e) {
+          if (e.propertyName !== 'opacity') return;
+          child.style.transitionDelay = '';
+          child.removeEventListener('transitionend', clear);
+        });
+      });
+    });
+
+    // Reveal blocks and groups as they scroll into view.
+    var items = document.querySelectorAll('.reveal, .stagger');
     if ('IntersectionObserver' in window) {
       var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (!entry.isIntersecting) return;
           entry.target.classList.add('visible');
           entry.target.querySelectorAll('[data-count]').forEach(countUp);
+          if (entry.target.hasAttribute('data-count')) countUp(entry.target);
           observer.unobserve(entry.target);
         });
-      }, { threshold: 0.12 });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
       items.forEach(function (el) { observer.observe(el); });
     } else {
       items.forEach(function (el) { el.classList.add('visible'); });
+    }
+
+    // Parallax: diagrams move a little slower than the page while scrolling.
+    var parallaxItems = document.querySelectorAll('[data-parallax]');
+    if (!reduceMotion && parallaxItems.length) {
+      var ticking = false;
+      function updateParallax() {
+        var middle = window.innerHeight / 2;
+        parallaxItems.forEach(function (img) {
+          var box = img.getBoundingClientRect();
+          var offset = (box.top + box.height / 2 - middle) * -0.06;   // 6% of the distance from screen center
+          img.style.setProperty('--py', offset.toFixed(1) + 'px');
+        });
+        ticking = false;
+      }
+      window.addEventListener('scroll', function () {
+        if (!ticking) { requestAnimationFrame(updateParallax); ticking = true; }
+      }, { passive: true });
+      updateParallax();
     }
   </script>
 </body>
