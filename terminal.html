@@ -196,7 +196,7 @@ a:hover { text-decoration: underline; }
 
   <div id="hero">
     <h1>Sanskar</h1>
-    <p>cybersecurity engineer &nbsp;·&nbsp; cloud threat hunter &nbsp;·&nbsp; former mountain person</p>
+    <p>iam engineer &nbsp;·&nbsp; former software engineer &nbsp;·&nbsp; former mountain person</p>
   </div>
 
   <div id="terminal">
@@ -287,9 +287,9 @@ async function boot() {
   addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
   await typeText('  MS Cybersecurity · FIU \'26  |  AZ-500 · Security+', 'cyan', 14);
-  await typeText('  SOC · Cloud Security · IAM · Detection Engineering', 'cyan', 14);
+  await typeText('  IAM · Cloud Security · Detection Engineering', 'cyan', 14);
   addBlank();
-  addLine('  <span class="tag">Microsoft Sentinel</span> <span class="tag">KQL</span> <span class="tag">Azure</span> <span class="tag">Entra ID</span> <span class="tag">Logic Apps</span>', 'line');
+  addLine('  <span class="tag">Active Directory</span> <span class="tag">Entra ID</span> <span class="tag">AWS IAM</span> <span class="tag">SAML / OIDC</span> <span class="tag">Microsoft Sentinel</span> <span class="tag">KQL</span>', 'line');
   addBlank();
   addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
@@ -344,18 +344,19 @@ function showWhoami() {
   addBlank();
   addLine('Originally from Nepal. Grew up trekking mountains,', 'info');
   addLine('riding motorcycles on roads that probably shouldn\'t exist.', 'info');
-  addLine('Somewhere along the way, ended up in Miami', 'info');
-  addLine('chasing zero-days instead of summits.', 'info');
+  addLine('Spent three years as a software engineer building logins', 'info');
+  addLine('and permissions, then went all in on identity and security.', 'info');
   addBlank();
   addLine('Cybersecurity is its own kind of wilderness —', 'cyan');
   addLine('constantly changing terrain, no map, something', 'cyan');
-  addLine('always trying to find a way in. I\'m good at that.', 'cyan');
+  addLine('always trying to find a way in. My job is deciding who gets one.', 'cyan');
   addBlank();
   addLine('MS Cybersecurity @ Florida International University', 'info');
-  addLine('GPA: 3.96  |  Graduating: April 2026', 'info');
-  addLine('BS Electrical & Electronics @ Kathmandu University', 'info');
+  addLine('Graduated: April 2026', 'info');
+  addLine('B.E. Electrical & Electronics Engineering @ Kathmandu University', 'info');
   addBlank();
-  addLine('Targeting: SOC Analyst  |  Cloud Security  |  IAM Analyst  |  Security Engineer', 'warn');
+  addLine('Looking for: IAM  |  Cloud Security  |  Security Operations roles', 'warn');
+  addLine('Based in Lewisville, Texas  |  Open to relocation', 'info');
   addBlank();
 }
 
@@ -366,29 +367,29 @@ function showSkills() {
   addLine('━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
   addBlank();
   addLine('SIEM & Detection', 'cyan');
-  addLine('  Microsoft Sentinel   KQL   Splunk   MITRE ATT&CK   Defender XDR', 'info');
+  addLine('  Microsoft Sentinel   KQL   MITRE ATT&CK   Defender XDR   Logic Apps (SOAR)', 'info');
   addBlank();
   addLine('Identity & Access Management', 'cyan');
-  addLine('  Entra ID   Azure RBAC   Conditional Access   PIM', 'info');
+  addLine('  Active Directory   LDAP   Entra ID   Azure RBAC', 'info');
   addLine('  AWS IAM   IAM Identity Center   SAML 2.0   OIDC', 'info');
-  addLine('  Permission Boundaries   SCPs   JIT Access', 'info');
+  addLine('  Permission Boundaries   JIT Access   Identity Lifecycle   SailPoint IdentityIQ (training)', 'info');
   addBlank();
   addLine('Cloud Security', 'cyan');
-  addLine('  Azure   Defender for Cloud   Logic Apps   Azure Monitor   AMA', 'info');
+  addLine('  Azure   Azure Monitor   Log Analytics   Azure Firewall', 'info');
   addLine('  AWS CloudTrail   CloudWatch   GuardDuty   Security Hub', 'info');
   addLine('  Secrets Manager   Lambda   EventBridge   AWS Organizations', 'info');
   addBlank();
   addLine('Infrastructure as Code & CI/CD', 'cyan');
-  addLine('  Terraform   GitHub Actions   AWS STS   Session Manager', 'info');
+  addLine('  Terraform   GitHub Actions   AWS CodePipeline   CodeBuild   Session Manager', 'info');
   addBlank();
   addLine('Offensive Tools', 'cyan');
   addLine('  Nmap   Metasploit   Burp Suite   Nessus   Wireshark   John the Ripper', 'info');
   addBlank();
   addLine('Frameworks', 'cyan');
-  addLine('  NIST CSF   NIST 800-53   HIPAA   PCI-DSS   SOX   OWASP Top 10', 'info');
+  addLine('  NIST CSF   NIST 800-53   OWASP Top 10   (coursework)', 'info');
   addBlank();
   addLine('Languages', 'cyan');
-  addLine('  Python   C   JavaScript   MATLAB   PowerShell   KQL', 'info');
+  addLine('  Python   Java   C   JavaScript   SQL   PowerShell   KQL   MATLAB', 'info');
   addBlank();
   addLine('ML & Research', 'cyan');
   addLine('  PyTorch   Hugging Face   Scikit-learn   GPT-2   RoBERTa', 'info');
@@ -404,14 +405,14 @@ function showProjects() {
 
   var projects = [
     {
-      name: 'SecureCorp AWS IAM Security Lab',
-      desc: 'Enterprise IAM environment on AWS. Least-privilege RBAC, permission boundaries, SCPs, SAML federation with Entra ID, OIDC for GitHub Actions, JIT access automation with DynamoDB state tracking, CloudTrail detection rules mapped to MITRE ATT&CK, and cross-cloud monitoring via Microsoft Sentinel.',
+      name: 'SecureCorp AWS IAM Lab',
+      desc: 'IAM for a simulated multi-department company. Group-based RBAC with permission boundaries, SAML SSO from Entra ID, OIDC for GitHub Actions, 5 Lambda functions for lifecycle and JIT access, CloudTrail alarms forwarded to Sentinel. Then I audited it: the revoke rule had no target, so a 5-minute grant stayed ~170 days.',
       tags: ['AWS IAM', 'Lambda', 'CloudTrail', 'GuardDuty', 'Terraform', 'Sentinel', 'SAML', 'OIDC'],
       url: 'https://github.com/slohani-22/SecureCorp-AWS-IAM-Lab'
     },
     {
       name: 'Microsoft Sentinel SIEM Lab',
-      desc: 'Production-grade cloud SOC on Azure. 16 custom KQL rules, 8-stage MITRE ATT&CK kill chain simulation, 3 incident investigations, SOAR playbook with Graph API automation, VNet flow logs, DNS logging, and Azure Firewall integration.',
+      desc: 'Detection and response lab on Azure. 16 custom KQL rules mapped to MITRE ATT&CK, an 8-stage attack simulation (4 incidents fired, 2 gaps traced to Run Command running as SYSTEM), 3 incident reports, and a SOAR playbook that disables a compromised account in 3.99 seconds.',
       tags: ['Azure', 'Sentinel', 'KQL', 'Logic Apps', 'SOAR', 'MITRE ATT&CK'],
       url: 'https://github.com/slohani-22/Microsoft-Sentinel-SIEM-Lab'
     },
@@ -423,14 +424,14 @@ function showProjects() {
     },
     {
       name: 'Hallucination-Aware NLP',
-      desc: 'Reduced LLM hallucination from 89.5% to 61.5% without retraining. IEEE-format research report published.',
+      desc: 'Team research: a grounded RoBERTa pipeline cut hallucination from 89.5% to 49.0% on 200 HotpotQA questions without retraining. Written up as an IEEE-format paper.',
       tags: ['GPT-2', 'RoBERTa', 'HotpotQA'],
       url: 'https://github.com/slohani-22/Hallucination-Aware-NLP'
     },
     {
       name: 'AppointDoc',
-      desc: 'HIPAA-aligned healthcare booking platform with 5 distinct security layers — JWT auth, rate limiting, input sanitization.',
-      tags: ['MERN', 'Node.js', 'MongoDB', 'HIPAA'],
+      desc: 'Team project: doctor-booking web app with 2FA, login throttling, session timeouts, reCAPTCHA, audit logging and separate roles for patients, doctors and admins.',
+      tags: ['MERN', 'Node.js', 'MongoDB', '2FA'],
       url: 'https://github.com/slohani-22/AppointDoc'
     },
     {
@@ -475,8 +476,9 @@ function showContact() {
   addLine('Email      <a href="mailto:sloha002@gmail.com">sloha002@gmail.com</a>', 'info');
   addLine('LinkedIn   <a href="https://linkedin.com/in/slohani22" target="_blank">linkedin.com/in/slohani22</a>', 'info');
   addLine('GitHub     <a href="https://github.com/slohani-22" target="_blank">github.com/slohani-22</a>', 'info');
+  addLine('Resume     <a href="resume.pdf" target="_blank">resume.pdf</a>', 'info');
   addBlank();
-  addLine('Open to full-time opportunities in cloud security, SOC analysis, IAM, and cybersecurity risk.', 'warn');
+  addLine('Open to full-time and contract roles in IAM, cloud security and security operations.', 'warn');
   addBlank();
 }
 
@@ -545,7 +547,7 @@ var secrets = {
     addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'sep');
     addLine('CVSS Score: 10.0 — CRITICAL', 'err');
     addLine('Description: Critical vulnerability in the human tendency', 'warn');
-    addLine('to underestimate entry-level candidates.', 'warn');
+    addLine('to overlook career switchers.', 'warn');
     addLine('Affects: Most hiring managers.', 'warn');
     addLine('Patch available: No.', 'dim');
     addLine('Workaround: Schedule an interview.', 'ok');
